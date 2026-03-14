@@ -148,7 +148,27 @@
     .section{padding:20px 20px 0}
     .section-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:12px}
 
-    /* MUSCLE CHIPS */
+    /* CATEGORY GRID */
+    .category-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 20px 4px}
+    .category-chip{display:flex;align-items:center;gap:10px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:13px 14px;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;transition:all .18s;box-shadow:var(--shadow-sm);width:100%}
+    .category-chip .cat-emoji{font-size:20px;flex-shrink:0}
+    .category-chip .cat-name{flex:1;text-align:left}
+    .category-chip .cat-arrow{font-size:10px;color:var(--text-light);transition:transform .2s}
+    .category-chip.active{border-color:currentColor;box-shadow:0 0 0 3px rgba(0,0,0,.06)}
+    .category-chip.active .cat-arrow{transform:rotate(90deg)}
+
+    /* DRAG TO REORDER */
+    .ex-mgmt-item{cursor:grab;transition:background .15s,box-shadow .15s}
+    .ex-mgmt-item.dragging{opacity:.45;cursor:grabbing}
+    .ex-mgmt-item.drag-over{box-shadow:0 -3px 0 var(--purple)}
+    .drag-handle{color:var(--text-light);font-size:16px;cursor:grab;padding:0 4px;flex-shrink:0;user-select:none}
+    .ex-mgmt-reset{display:flex;align-items:center;gap:5px;background:none;border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:5px 10px;font-family:var(--font-body);font-size:11px;font-weight:600;color:var(--text-light);cursor:pointer;margin-top:8px;transition:border-color .15s,color .15s}
+    .ex-mgmt-reset:hover{border-color:var(--text-light);color:var(--text-secondary)}
+
+    /* EXERCISES TAB CATEGORY HEADERS */
+    .ex-category-header{padding:16px 20px 4px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-light);display:flex;align-items:center;gap:8px}
+    .ex-category-header::after{content:'';flex:1;height:1px;background:var(--border)}
+
     .muscle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 20px 4px;margin:4px 0 0}
     .muscle-chip{display:flex;align-items:center;gap:7px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:all .18s;box-shadow:var(--shadow-sm);width:100%}
     .muscle-chip .chip-emoji{font-size:16px;line-height:1;flex-shrink:0}
@@ -512,9 +532,15 @@ padding:18px 20px 8px;font-size:11px;font-weight:600;letter-spacing:.07em;text-t
     </div>
 
     <div class="section" style="padding-top:16px">
-      <div class="section-label">Muscle Group</div>
+      <div class="section-label">Category</div>
     </div>
-    <div class="muscle-grid" id="muscleChips"></div>
+    <div class="category-grid" id="categoryChips"></div>
+    <div id="subgroupRow" style="display:none">
+      <div class="section" style="padding-top:12px">
+        <div class="section-label" id="subgroupLabel">Muscle Group</div>
+      </div>
+      <div class="muscle-grid" id="muscleChips"></div>
+    </div>
 
     <div class="exercise-section" id="exerciseSection" style="display:none">
       <div class="section-label" style="margin-bottom:12px" id="exerciseLabel"></div>
@@ -522,7 +548,7 @@ padding:18px 20px 8px;font-size:11px;font-weight:600;letter-spacing:.07em;text-t
     </div>
     <div class="muscle-prompt" id="musclePrompt">
       <span class="prompt-emoji">💪</span>
-      <p>Pick a muscle group above<br>to see your exercises</p>
+      <p>Pick a category above,<br>then choose a muscle group</p>
     </div>
   </div>
 
@@ -571,9 +597,17 @@ padding:18px 20px 8px;font-size:11px;font-weight:600;letter-spacing:.07em;text-t
     <div class="ex-mgmt-section" id="exMgmtContent"></div>
     <div class="add-muscle-group-section">
       <div class="section-label" style="margin-bottom:10px">New Muscle Group</div>
-      <div class="add-muscle-row">
-        <input class="add-muscle-input" id="newMuscleInput" placeholder="e.g. Forearms" maxlength="30"/>
-        <button class="add-muscle-btn" onclick="addMuscleGroup()">+ Add</button>
+      <div class="add-muscle-row" style="flex-direction:column;gap:8px">
+        <input class="add-muscle-input" id="newMuscleInput" placeholder="e.g. Forearms" maxlength="30" style="width:100%"/>
+        <div style="display:flex;gap:8px">
+          <select class="add-muscle-input" id="newMuscleCategory" style="flex:1;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ea3b5' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px">
+            <option value="Upper Body">Upper Body</option>
+            <option value="Lower Body">Lower Body</option>
+            <option value="Core">Core</option>
+            <option value="Cardio">Cardio</option>
+          </select>
+          <button class="add-muscle-btn" onclick="addMuscleGroup()">+ Add</button>
+        </div>
       </div>
     </div>
   </div>
@@ -806,37 +840,71 @@ padding:18px 20px 8px;font-size:11px;font-weight:600;letter-spacing:.07em;text-t
 
 <script>
 // ─── DEFAULT DATA ─────────────────────────────────────────────
-const DEFAULT_MUSCLE_CONFIG = {
-  "Chest":     {emoji:"🫁",color:"#ef4444",bg:"#fef2f2"},
-  "Back":      {emoji:"🔙",color:"#3b82f6",bg:"#eff6ff"},
-  "Shoulders": {emoji:"🏋️",color:"#8b5cf6",bg:"#f5f3ff"},
-  "Biceps":    {emoji:"💪",color:"#22c55e",bg:"#f0fdf4"},
-  "Triceps":   {emoji:"🦾",color:"#f59e0b",bg:"#fffbeb"},
-  "Legs":      {emoji:"🦵",color:"#06b6d4",bg:"#ecfeff"},
-  "Core":      {emoji:"🎯",color:"#ec4899",bg:"#fdf2f8"},
-  "Cardio":    {emoji:"❤️",color:"#f97316",bg:"#fff7ed"}
+// ─── CATEGORY STRUCTURE ──────────────────────────────────────
+const CATEGORIES = {
+  "Upper Body": { emoji:"💪", color:"#8b5cf6", bg:"#f5f3ff", subgroups:["Chest","Back","Shoulders","Biceps","Triceps"] },
+  "Lower Body": { emoji:"🦵", color:"#06b6d4", bg:"#ecfeff", subgroups:["Quads","Hamstrings","Glutes","Calves"] },
+  "Core":       { emoji:"🎯", color:"#ec4899", bg:"#fdf2f8", subgroups:["Abs","Obliques","Lower Back"] },
+  "Cardio":     { emoji:"❤️", color:"#f97316", bg:"#fff7ed", subgroups:["Cardio","HIIT","Stretching"] }
 };
+
+// Which category each muscle belongs to (for new muscles added by user, default to Upper Body)
+const DEFAULT_MUSCLE_CATEGORY = {
+  "Chest":"Upper Body","Back":"Upper Body","Shoulders":"Upper Body","Biceps":"Upper Body","Triceps":"Upper Body",
+  "Quads":"Lower Body","Hamstrings":"Lower Body","Glutes":"Lower Body","Calves":"Lower Body",
+  "Abs":"Core","Obliques":"Core","Lower Back":"Core",
+  "Cardio":"Cardio","HIIT":"Cardio","Stretching":"Cardio"
+};
+
+const DEFAULT_MUSCLE_CONFIG = {
+  "Chest":      {emoji:"🫁",color:"#ef4444",bg:"#fef2f2"},
+  "Back":       {emoji:"🔙",color:"#3b82f6",bg:"#eff6ff"},
+  "Shoulders":  {emoji:"🏋️",color:"#8b5cf6",bg:"#f5f3ff"},
+  "Biceps":     {emoji:"💪",color:"#22c55e",bg:"#f0fdf4"},
+  "Triceps":    {emoji:"🦾",color:"#f59e0b",bg:"#fffbeb"},
+  "Quads":      {emoji:"🦵",color:"#06b6d4",bg:"#ecfeff"},
+  "Hamstrings": {emoji:"🦿",color:"#0891b2",bg:"#ecfeff"},
+  "Glutes":     {emoji:"🍑",color:"#ec4899",bg:"#fdf2f8"},
+  "Calves":     {emoji:"🦶",color:"#14b8a6",bg:"#f0fdfa"},
+  "Abs":        {emoji:"🎯",color:"#ec4899",bg:"#fdf2f8"},
+  "Obliques":   {emoji:"↔️",color:"#f43f5e",bg:"#fff1f2"},
+  "Lower Back": {emoji:"🔱",color:"#a855f7",bg:"#faf5ff"},
+  "Cardio":     {emoji:"❤️",color:"#f97316",bg:"#fff7ed"},
+  "HIIT":       {emoji:"⚡",color:"#eab308",bg:"#fefce8"},
+  "Stretching": {emoji:"🧘",color:"#10b981",bg:"#ecfdf5"}
+};
+
 const DEFAULT_EXERCISES = {
-  "Chest":     ["Bench Press","Incline Dumbbell Press","Cable Fly","Push-Up","Chest Dip"],
-  "Back":      ["Pull-Up","Barbell Row","Lat Pulldown","Seated Cable Row","Face Pull"],
-  "Shoulders": ["Overhead Press","Lateral Raise","Front Raise","Arnold Press","Reverse Fly"],
-  "Biceps":    ["Barbell Curl","Hammer Curl","Incline Dumbbell Curl","Cable Curl","Concentration Curl"],
-  "Triceps":   ["Tricep Pushdown","Skull Crusher","Overhead Tricep Extension","Dips","Close-Grip Bench"],
-  "Legs":      ["Squat","Romanian Deadlift","Leg Press","Lunges","Leg Curl","Calf Raise"],
-  "Core":      ["Plank","Hanging Leg Raise","Cable Crunch","Russian Twist","Ab Wheel Rollout"],
-  "Cardio":    ["Treadmill Run","Stationary Bike","Jump Rope","Rowing Machine","Stair Climber"]
+  "Chest":      ["Bench Press","Cable Fly","Chest Dip","Incline Dumbbell Press","Push-Up"],
+  "Back":       ["Barbell Row","Face Pull","Lat Pulldown","Pull-Up","Seated Cable Row"],
+  "Shoulders":  ["Arnold Press","Front Raise","Lateral Raise","Overhead Press","Reverse Fly"],
+  "Biceps":     ["Barbell Curl","Cable Curl","Concentration Curl","Hammer Curl","Incline Dumbbell Curl"],
+  "Triceps":    ["Close-Grip Bench","Dips","Overhead Tricep Extension","Skull Crusher","Tricep Pushdown"],
+  "Quads":      ["Front Squat","Hack Squat","Leg Extension","Leg Press","Squat"],
+  "Hamstrings": ["Good Morning","Leg Curl","Nordic Curl","Romanian Deadlift","Stiff-Leg Deadlift"],
+  "Glutes":     ["Bulgarian Split Squat","Cable Kickback","Glute Bridge","Hip Thrust","Lunges"],
+  "Calves":     ["Calf Raise","Donkey Calf Raise","Seated Calf Raise","Single-Leg Calf Raise","Tibialis Raise"],
+  "Abs":        ["Ab Wheel Rollout","Cable Crunch","Hanging Leg Raise","Plank","V-Up"],
+  "Obliques":   ["Bicycle Crunch","Russian Twist","Side Plank","Woodchopper","Windshield Wiper"],
+  "Lower Back": ["Back Extension","Bird Dog","Deadlift","Good Morning","Superman"],
+  "Cardio":     ["Rowing Machine","Stair Climber","Stationary Bike","Treadmill Run","Jump Rope"],
+  "HIIT":       ["Battle Ropes","Box Jump","Burpee","Mountain Climber","Sprint Interval"],
+  "Stretching": ["Child's Pose","Foam Rolling","Hip Flexor Stretch","Pigeon Pose","World's Greatest Stretch"]
 };
 
 // ─── STATE ────────────────────────────────────────────────────
 let logs = JSON.parse(localStorage.getItem('b2l_logs')||'[]');
 let EXERCISES = JSON.parse(localStorage.getItem('b2l_exercises')||JSON.stringify(DEFAULT_EXERCISES));
 let MUSCLE_CONFIG = JSON.parse(localStorage.getItem('b2l_muscle_config')||JSON.stringify(DEFAULT_MUSCLE_CONFIG));
+let MUSCLE_CATEGORY = JSON.parse(localStorage.getItem('b2l_muscle_category')||JSON.stringify(DEFAULT_MUSCLE_CATEGORY));
+let EXERCISE_ORDER = JSON.parse(localStorage.getItem('b2l_exercise_order')||'{}'); // {muscle:[...custom order]}
 let weightSortActive = false;
-let dateFilterMode = ''; // '', 'on', 'before', 'after', 'range'
+let dateFilterMode = '';
 let pendingDeleteId = null;
-let pendingDeleteType = 'log'; // 'log' | 'exercise' | 'muscle'
+let pendingDeleteType = 'log';
 let pendingDeleteMeta = null;
 let insightType = 'fact';
+let openCategory = null; // which category is currently expanded
 
 const EFFORT_OPTIONS = [
   {key:'struggled', label:'Passed &\nStruggled', emoji:'😤', cls:'selected-struggled'},
@@ -857,16 +925,75 @@ function init(){
 }
 
 function buildMuscleChips(){
-  const container = document.getElementById('muscleChips');
-  container.innerHTML = '';
-  Object.keys(EXERCISES).sort((a,b)=>a.localeCompare(b)).forEach(muscle=>{
-    const cfg = getMuscleConfig(muscle);
+  // Build category chips (2×2 grid)
+  const catContainer = document.getElementById('categoryChips');
+  if(!catContainer) return;
+  catContainer.innerHTML = '';
+
+  // Build dynamic categories from current MUSCLE_CATEGORY mapping
+  const dynCats = {};
+  Object.entries(MUSCLE_CATEGORY).forEach(([muscle, cat])=>{
+    if(!dynCats[cat]) dynCats[cat] = [];
+    if(EXERCISES[muscle]) dynCats[cat].push(muscle);
+  });
+  // Merge with defined CATEGORIES order
+  const catOrder = Object.keys(CATEGORIES);
+  const allCats = [...catOrder, ...Object.keys(dynCats).filter(c=>!catOrder.includes(c))];
+
+  allCats.forEach(cat=>{
+    const cfg = CATEGORIES[cat] || {emoji:'💪',color:'#64687a',bg:'#f0f2f6'};
+    const chip = document.createElement('button');
+    chip.className = 'category-chip';
+    chip.dataset.cat = cat;
+    chip.style.color = cfg.color;
+    chip.innerHTML = `<span class="cat-emoji">${cfg.emoji}</span><span class="cat-name">${cat}</span><span class="cat-arrow">›</span>`;
+    chip.onclick = ()=>toggleCategory(cat, chip);
+    catContainer.appendChild(chip);
+  });
+
+  // Restore open state
+  if(openCategory) showSubgroups(openCategory);
+}
+
+function toggleCategory(cat, chip){
+  const allChips = document.querySelectorAll('.category-chip');
+  if(openCategory === cat){
+    // Collapse
+    openCategory = null;
+    allChips.forEach(c=>c.classList.remove('active'));
+    document.getElementById('subgroupRow').style.display='none';
+    document.getElementById('exerciseSection').style.display='none';
+    document.getElementById('musclePrompt').style.display='block';
+    return;
+  }
+  openCategory = cat;
+  allChips.forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  showSubgroups(cat);
+}
+
+function showSubgroups(cat){
+  const cfg = CATEGORIES[cat] || {emoji:'💪'};
+  // Get subgroups — from CATEGORIES definition + any custom muscles in this category
+  const defined = CATEGORIES[cat]?.subgroups || [];
+  const custom = Object.keys(MUSCLE_CATEGORY).filter(m=>MUSCLE_CATEGORY[m]===cat && !defined.includes(m) && EXERCISES[m]);
+  const subgroups = [...defined.filter(m=>EXERCISES[m]), ...custom].sort((a,b)=>a.localeCompare(b));
+
+  const subRow = document.getElementById('subgroupRow');
+  const chipsEl = document.getElementById('muscleChips');
+  document.getElementById('subgroupLabel').textContent = `${cfg.emoji} ${cat} — Choose Muscle`;
+  subRow.style.display = 'block';
+  chipsEl.innerHTML = '';
+  subgroups.forEach(muscle=>{
+    const mcfg = getMuscleConfig(muscle);
     const chip = document.createElement('button');
     chip.className = 'muscle-chip';
-    chip.innerHTML = `<span class="chip-emoji">${cfg.emoji}</span><span>${muscle}</span>`;
-    chip.onclick = ()=>selectMuscle(muscle,chip);
-    container.appendChild(chip);
+    chip.innerHTML = `<span class="chip-emoji">${mcfg.emoji}</span><span>${muscle}</span>`;
+    chip.onclick = ()=>selectMuscle(muscle, chip);
+    chipsEl.appendChild(chip);
   });
+  document.getElementById('musclePrompt').style.display='block';
+  document.getElementById('exerciseSection').style.display='none';
 }
 
 function getMuscleConfig(muscle){
@@ -994,18 +1121,27 @@ function clearExSearch(){
 
 function jumpToExercise(muscle, exercise){
   clearExSearch();
-  // activate the right muscle chip
-  const chips = document.querySelectorAll('.muscle-chip');
-  chips.forEach(c=>{ if(c.querySelector('span:last-child')?.textContent.trim()===muscle) selectMuscle(muscle, c); });
-  // scroll to and open the matching exercise card after render
+  // Find which category this muscle belongs to
+  const cat = MUSCLE_CATEGORY[muscle] || Object.keys(CATEGORIES)[0];
+  // Activate the category chip
+  const catChips = document.querySelectorAll('.category-chip');
+  let catChip = null;
+  catChips.forEach(c=>{ if(c.dataset.cat===cat) catChip=c; });
+  if(catChip){ openCategory=null; toggleCategory(cat, catChip); }
+  // Then activate the muscle chip
   setTimeout(()=>{
-    const cards = document.querySelectorAll('.exercise-card');
-    cards.forEach(card=>{
-      if(card.querySelector('.exercise-name')?.textContent === exercise){
-        card.classList.add('open');
-        card.scrollIntoView({behavior:'smooth', block:'center'});
-      }
-    });
+    const chips = document.querySelectorAll('.muscle-chip');
+    chips.forEach(c=>{ if(c.querySelector('span:last-child')?.textContent.trim()===muscle) selectMuscle(muscle,c); });
+    // Scroll to and open the exercise card
+    setTimeout(()=>{
+      const cards = document.querySelectorAll('.exercise-card');
+      cards.forEach(card=>{
+        if(card.querySelector('.exercise-name')?.textContent===exercise){
+          card.classList.add('open');
+          card.scrollIntoView({behavior:'smooth',block:'center'});
+        }
+      });
+    }, 80);
   }, 60);
 }
 
@@ -1028,10 +1164,22 @@ function selectMuscle(muscle, chip){
   renderExerciseList(muscle);
 }
 
+function getOrderedExercises(muscle){
+  const all = EXERCISES[muscle] || [];
+  const custom = EXERCISE_ORDER[muscle];
+  if(custom && custom.length){
+    // Use custom order, append any new ones not yet in order
+    const ordered = custom.filter(e=>all.includes(e));
+    const extras = all.filter(e=>!ordered.includes(e)).sort((a,b)=>a.localeCompare(b));
+    return [...ordered,...extras];
+  }
+  return [...all].sort((a,b)=>a.localeCompare(b));
+}
+
 function renderExerciseList(muscle){
   const list=document.getElementById('exerciseList'), cfg=getMuscleConfig(muscle);
   list.innerHTML='';
-  (EXERCISES[muscle]||[]).forEach(ex=>{
+  getOrderedExercises(muscle).forEach(ex=>{
     const card=document.createElement('div'); card.className='exercise-card';
     const effortHTML = EFFORT_OPTIONS.map(e=>`
       <button class="effort-btn" data-effort="${e.key}" onclick="selectEffort(this)">
@@ -1263,43 +1411,73 @@ let exGroupOpen = {}; // track which groups are expanded
 function renderExercisesTab(){
   const container = document.getElementById('exMgmtContent');
   container.innerHTML = '';
+
+  // Build category → muscles map
+  const catMusclemap = {};
   Object.keys(EXERCISES).forEach(muscle=>{
-    const cfg = getMuscleConfig(muscle);
-    const items = EXERCISES[muscle];
-    const isOpen = exGroupOpen[muscle] !== false; // default open
+    const cat = MUSCLE_CATEGORY[muscle] || 'Other';
+    if(!catMusclemap[cat]) catMusclemap[cat] = [];
+    catMusclemap[cat].push(muscle);
+  });
 
-    const group = document.createElement('div');
-    group.className = `ex-mgmt-group${isOpen?' open':''}`;
-    group.id = `exgroup-${muscle}`;
+  const catOrder = [...Object.keys(CATEGORIES), ...Object.keys(catMusclemap).filter(c=>!CATEGORIES[c])];
 
-    const itemsHTML = items.map((ex,i)=>`
-      <div class="ex-mgmt-item" id="exitem-${muscle}-${i}">
-        <span class="ex-mgmt-name">${ex}</span>
-        <input class="ex-mgmt-edit-input" value="${ex}" maxlength="50"/>
-        <div class="ex-mgmt-actions">
-          <button class="ex-mgmt-btn edit-btn" onclick="startEditEx('${muscle}',${i})">✏️</button>
-          <button class="ex-mgmt-btn save" style="display:none" onclick="saveEditEx('${muscle}',${i})">✓</button>
-          <button class="ex-mgmt-btn cancel" style="display:none" onclick="cancelEditEx('${muscle}',${i})">✕</button>
-          <button class="ex-mgmt-btn del-btn" onclick="askDeleteExercise('${muscle}',${i},'${ex.replace(/'/g,"\\'")}')">🗑️</button>
+  catOrder.forEach(cat=>{
+    const muscles = (catMusclemap[cat]||[]).sort((a,b)=>a.localeCompare(b));
+    if(!muscles.length) return;
+
+    // Category header
+    const catHeader = document.createElement('div');
+    catHeader.className = 'ex-category-header';
+    const catCfg = CATEGORIES[cat]||{emoji:'💪'};
+    catHeader.innerHTML = `${catCfg.emoji} ${cat}`;
+    container.appendChild(catHeader);
+
+    muscles.forEach(muscle=>{
+      const cfg = getMuscleConfig(muscle);
+      const orderedItems = getOrderedExercises(muscle);
+      const isOpen = exGroupOpen[muscle] !== false;
+
+      const group = document.createElement('div');
+      group.className = `ex-mgmt-group${isOpen?' open':''}`;
+      group.id = `exgroup-${muscle}`;
+
+      const hasCustomOrder = !!(EXERCISE_ORDER[muscle] && EXERCISE_ORDER[muscle].length);
+      const itemsHTML = orderedItems.map((ex,i)=>`
+        <div class="ex-mgmt-item" id="exitem-${muscle}-${i}" draggable="true"
+          ondragstart="dragStart(event,'${muscle}',${i})"
+          ondragover="dragOver(event)"
+          ondrop="dragDrop(event,'${muscle}',${i})"
+          ondragend="dragEnd(event)">
+          <span class="drag-handle">⠿</span>
+          <span class="ex-mgmt-name">${ex}</span>
+          <input class="ex-mgmt-edit-input" value="${ex}" maxlength="50"/>
+          <div class="ex-mgmt-actions">
+            <button class="ex-mgmt-btn edit-btn" onclick="startEditEx('${muscle}',${i})">✏️</button>
+            <button class="ex-mgmt-btn save" style="display:none" onclick="saveEditEx('${muscle}',${i})">✓</button>
+            <button class="ex-mgmt-btn cancel" style="display:none" onclick="cancelEditEx('${muscle}',${i})">✕</button>
+            <button class="ex-mgmt-btn del-btn" onclick="askDeleteExercise('${muscle}',${i},'${ex.replace(/'/g,"\\'")}')">🗑️</button>
+          </div>
+        </div>`).join('');
+
+      group.innerHTML = `
+        <div class="ex-mgmt-group-header" onclick="toggleExGroup('${muscle}')">
+          <span class="ex-mgmt-group-emoji">${cfg.emoji}</span>
+          <span class="ex-mgmt-group-name">${muscle}</span>
+          <span class="ex-mgmt-group-count">${orderedItems.length}</span>
+          <button class="ex-mgmt-group-del" onclick="event.stopPropagation();askDeleteMuscle('${muscle}')" title="Remove group">🗑️</button>
+          <svg class="ex-mgmt-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
-      </div>`).join('');
-
-    group.innerHTML = `
-      <div class="ex-mgmt-group-header" onclick="toggleExGroup('${muscle}')">
-        <span class="ex-mgmt-group-emoji">${cfg.emoji}</span>
-        <span class="ex-mgmt-group-name">${muscle}</span>
-        <span class="ex-mgmt-group-count">${items.length}</span>
-        <button class="ex-mgmt-group-del" onclick="event.stopPropagation();askDeleteMuscle('${muscle}')" title="Remove group">🗑️</button>
-        <svg class="ex-mgmt-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-      </div>
-      <div class="ex-mgmt-body">
-        ${itemsHTML}
-        <div class="ex-inline-add">
-          <input class="ex-inline-add-input" id="newex-${muscle}" placeholder="Add exercise to ${muscle}…" maxlength="50"/>
-          <button class="ex-inline-add-btn" onclick="addExercise('${muscle}')">+ Add</button>
-        </div>
-      </div>`;
-    container.appendChild(group);
+        <div class="ex-mgmt-body">
+          ${itemsHTML}
+          ${hasCustomOrder?`<button class="ex-mgmt-reset" onclick="resetExerciseOrder('${muscle}')">↺ Reset to A–Z</button>`:''}
+          <div class="ex-inline-add">
+            <input class="ex-inline-add-input" id="newex-${muscle}" placeholder="Add exercise to ${muscle}…" maxlength="50"/>
+            <button class="ex-inline-add-btn" onclick="addExercise('${muscle}')">+ Add</button>
+          </div>
+        </div>`;
+      container.appendChild(group);
+    });
   });
 }
 
@@ -1309,11 +1487,57 @@ function toggleExGroup(muscle){
   exGroupOpen[muscle] = isOpen;
 }
 
+// ── Drag to reorder ──────────────────────────────────────────
+let dragSrcMuscle = null, dragSrcIdx = null;
+
+function dragStart(e, muscle, idx){
+  dragSrcMuscle = muscle; dragSrcIdx = idx;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function dragOver(e){
+  e.preventDefault(); e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.ex-mgmt-item').forEach(el=>el.classList.remove('drag-over'));
+  e.currentTarget.classList.add('drag-over');
+}
+function dragDrop(e, muscle, idx){
+  e.preventDefault();
+  if(dragSrcMuscle !== muscle || dragSrcIdx === idx) return;
+  const ordered = getOrderedExercises(muscle);
+  const moved = ordered.splice(dragSrcIdx, 1)[0];
+  ordered.splice(idx, 0, moved);
+  EXERCISE_ORDER[muscle] = ordered;
+  saveExerciseOrder();
+  renderExercisesTab();
+}
+function dragEnd(e){
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.ex-mgmt-item').forEach(el=>el.classList.remove('drag-over'));
+}
+function resetExerciseOrder(muscle){
+  delete EXERCISE_ORDER[muscle];
+  saveExerciseOrder();
+  renderExercisesTab();
+  showToast('↺ Reset to A–Z');
+}
+
 // Global "Add Exercise" bottom sheet
 function openAddExSheet(){
   const sel = document.getElementById('globalExMuscle');
   sel.innerHTML = '<option value="">Choose muscle group…</option>';
-  Object.keys(EXERCISES).forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; sel.appendChild(o); });
+  const catMusclemap = {};
+  Object.keys(EXERCISES).sort((a,b)=>a.localeCompare(b)).forEach(m=>{
+    const cat = MUSCLE_CATEGORY[m]||'Other';
+    if(!catMusclemap[cat]) catMusclemap[cat]=[];
+    catMusclemap[cat].push(m);
+  });
+  const catOrder = [...Object.keys(CATEGORIES), ...Object.keys(catMusclemap).filter(c=>!CATEGORIES[c])];
+  catOrder.forEach(cat=>{
+    if(!catMusclemap[cat]) return;
+    const og = document.createElement('optgroup'); og.label = cat;
+    catMusclemap[cat].forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; og.appendChild(o); });
+    sel.appendChild(og);
+  });
   document.getElementById('globalExName').value = '';
   document.getElementById('addExSheet').classList.add('open');
   setTimeout(()=>document.getElementById('globalExName').focus(), 100);
@@ -1324,18 +1548,19 @@ function addExerciseGlobal(){
   const muscle = document.getElementById('globalExMuscle').value;
   if(!name){ showToast('Enter an exercise name'); return; }
   if(!muscle){ showToast('Choose a muscle group'); return; }
-  if(EXERCISES[muscle].includes(name)){ showToast('Already exists'); return; }
+  if((EXERCISES[muscle]||[]).includes(name)){ showToast('Already exists'); return; }
+  if(!EXERCISES[muscle]) EXERCISES[muscle]=[];
   EXERCISES[muscle].push(name);
-  exGroupOpen[muscle] = true; // expand the group it was added to
+  exGroupOpen[muscle] = true;
   saveExercises(); renderExercisesTab(); buildMuscleChips();
   closeAddExSheet();
   showToast(`✓ Added "${name}" to ${muscle}`);
 }
 
 
-
 function startEditEx(muscle, i){
   const row=document.getElementById(`exitem-${muscle}-${i}`);
+  if(!row) return;
   row.querySelector('.ex-mgmt-name').classList.add('editing');
   row.querySelector('.ex-mgmt-edit-input').classList.add('editing');
   row.querySelector('.edit-btn').style.display='none';
@@ -1346,9 +1571,11 @@ function startEditEx(muscle, i){
 }
 function cancelEditEx(muscle, i){
   const row=document.getElementById(`exitem-${muscle}-${i}`);
+  if(!row) return;
+  const ordered = getOrderedExercises(muscle);
   row.querySelector('.ex-mgmt-name').classList.remove('editing');
   row.querySelector('.ex-mgmt-edit-input').classList.remove('editing');
-  row.querySelector('.ex-mgmt-edit-input').value=EXERCISES[muscle][i];
+  row.querySelector('.ex-mgmt-edit-input').value=ordered[i]||'';
   row.querySelector('.edit-btn').style.display='flex';
   row.querySelector('.save').style.display='none';
   row.querySelector('.cancel').style.display='none';
@@ -1356,9 +1583,20 @@ function cancelEditEx(muscle, i){
 }
 function saveEditEx(muscle, i){
   const row=document.getElementById(`exitem-${muscle}-${i}`);
+  if(!row) return;
   const newName=row.querySelector('.ex-mgmt-edit-input').value.trim();
   if(!newName){showToast('Name cannot be empty');return;}
-  EXERCISES[muscle][i]=newName;
+  const ordered = getOrderedExercises(muscle);
+  const oldName = ordered[i];
+  // Update in EXERCISES array
+  const idx = EXERCISES[muscle].indexOf(oldName);
+  if(idx>=0) EXERCISES[muscle][idx] = newName;
+  // Update in custom order if exists
+  if(EXERCISE_ORDER[muscle]){
+    const oi = EXERCISE_ORDER[muscle].indexOf(oldName);
+    if(oi>=0) EXERCISE_ORDER[muscle][oi] = newName;
+    saveExerciseOrder();
+  }
   saveExercises(); renderExercisesTab(); buildMuscleChips();
   showToast('✓ Exercise updated');
 }
@@ -1375,17 +1613,21 @@ function addExercise(muscle){
 
 function addMuscleGroup(){
   const input=document.getElementById('newMuscleInput');
+  const catSel=document.getElementById('newMuscleCategory');
   const name=input.value.trim();
+  const cat=catSel?catSel.value:'Upper Body';
   if(!name){showToast('Enter a muscle group name');return;}
   if(EXERCISES[name]){showToast('Already exists');return;}
-  EXERCISES[name]=[]; 
+  EXERCISES[name]=[];
   MUSCLE_CONFIG[name]={emoji:'💪',color:'#64687a',bg:'#f0f2f6'};
+  MUSCLE_CATEGORY[name]=cat;
   saveExercises(); renderExercisesTab(); buildMuscleChips(); input.value='';
-  showToast(`✓ Added "${name}"`);
+  showToast(`✓ Added "${name}" to ${cat}`);
 }
 
 function askDeleteExercise(muscle, i, name){
-  pendingDeleteType='exercise'; pendingDeleteMeta={muscle,i,name};
+  // name is passed directly now — use it
+  pendingDeleteType='exercise'; pendingDeleteMeta={muscle,name};
   document.getElementById('confirmTitle').textContent='Remove exercise?';
   document.getElementById('confirmSub').textContent=`"${name}" will be removed from ${muscle}.`;
   document.getElementById('confirmDelBtn').textContent='Remove';
@@ -1418,14 +1660,17 @@ function confirmDelete(){
     saveLogs(); renderHistory(); populateFilterOptions(); renderExportStats();
     showToast('🗑️ Entry deleted');
   } else if(pendingDeleteType==='exercise'){
-    const {muscle,i}=pendingDeleteMeta;
-    EXERCISES[muscle].splice(i,1);
-    saveExercises(); renderExercisesTab(); buildMuscleChips();
+    const {muscle,name}=pendingDeleteMeta;
+    EXERCISES[muscle]=EXERCISES[muscle].filter(e=>e!==name);
+    if(EXERCISE_ORDER[muscle]) EXERCISE_ORDER[muscle]=EXERCISE_ORDER[muscle].filter(e=>e!==name);
+    saveExercises(); saveExerciseOrder(); renderExercisesTab(); buildMuscleChips();
     showToast('🗑️ Exercise removed');
   } else if(pendingDeleteType==='muscle'){
     const {muscle}=pendingDeleteMeta;
     delete EXERCISES[muscle];
-    saveExercises(); renderExercisesTab(); buildMuscleChips();
+    delete MUSCLE_CATEGORY[muscle];
+    delete EXERCISE_ORDER[muscle];
+    saveExercises(); saveExerciseOrder(); renderExercisesTab(); buildMuscleChips();
     showToast(`🗑️ "${muscle}" removed`);
   }
   closeConfirm();
@@ -1464,11 +1709,13 @@ function exportExcel(){
 
 function exportBackup(){
   const backup = {
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     logs,
     exercises: EXERCISES,
-    muscleConfig: MUSCLE_CONFIG
+    muscleConfig: MUSCLE_CONFIG,
+    muscleCategory: MUSCLE_CATEGORY,
+    exerciseOrder: EXERCISE_ORDER
   };
   const json = JSON.stringify(backup, null, 2);
   const a = Object.assign(document.createElement('a'),{
@@ -1486,25 +1733,20 @@ function importBackup(event){
   reader.onload = e => {
     try {
       const backup = JSON.parse(e.target.result);
-      // Validate it's a Born2Lift backup
       if(!backup.version || !backup.logs || !backup.exercises){
         showToast('⚠️ Invalid backup file'); return;
       }
-      // Restore everything
       logs = backup.logs || [];
       EXERCISES = backup.exercises || {};
       MUSCLE_CONFIG = backup.muscleConfig || {};
-      saveLogs();
-      saveExercises();
-      // Refresh all views
-      buildMuscleChips();
-      renderExportStats();
-      populateFilterOptions();
+      MUSCLE_CATEGORY = backup.muscleCategory || DEFAULT_MUSCLE_CATEGORY;
+      EXERCISE_ORDER = backup.exerciseOrder || {};
+      saveLogs(); saveExercises(); saveExerciseOrder();
+      buildMuscleChips(); renderExportStats(); populateFilterOptions();
       showToast(`✓ Restored ${logs.length} sets!`);
     } catch {
       showToast('⚠️ Could not read backup file');
     }
-    // Reset the input so the same file can be loaded again if needed
     event.target.value = '';
   };
   reader.readAsText(file);
@@ -1514,6 +1756,10 @@ function saveLogs(){localStorage.setItem('b2l_logs',JSON.stringify(logs));}
 function saveExercises(){
   localStorage.setItem('b2l_exercises',JSON.stringify(EXERCISES));
   localStorage.setItem('b2l_muscle_config',JSON.stringify(MUSCLE_CONFIG));
+  localStorage.setItem('b2l_muscle_category',JSON.stringify(MUSCLE_CATEGORY));
+}
+function saveExerciseOrder(){
+  localStorage.setItem('b2l_exercise_order',JSON.stringify(EXERCISE_ORDER));
 }
 function switchView(name,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
