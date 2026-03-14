@@ -723,12 +723,7 @@ padding:18px 20px 8px;font-size:11px;font-weight:600;letter-spacing:.07em;text-t
       <div class="section-label" style="margin-bottom:14px;margin-top:20px">Download As</div>
       <div class="export-card" onclick="exportCSV()">
         <div class="export-file-icon csv">📄</div>
-        <div class="export-info"><h3>CSV File</h3><p>Opens in any spreadsheet app</p></div>
-        <div class="export-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></div>
-      </div>
-      <div class="export-card" onclick="exportExcel()">
-        <div class="export-file-icon xlsx">📊</div>
-        <div class="export-info"><h3>Excel File (.xlsx)</h3><p>Formatted for Microsoft Excel</p></div>
+        <div class="export-info"><h3>CSV File</h3><p>Workout log — opens in any spreadsheet app</p></div>
         <div class="export-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></div>
       </div>
 
@@ -1711,50 +1706,25 @@ function renderExportStats(){
 }
 function getCSVData(){
   const h=['Date','Muscle Group','Exercise','Sets','Reps','Weight (lbs)','Effort','Notes'];
-  const rows=logs.map(l=>[l.date,l.muscle,l.exercise,l.sets,l.reps,l.weight,l.effort||'',`"${(l.notes||'').replace(/"/g,'""')}"`]);
-  return [h,...rows].map(r=>r.join(',')).join('\n');
-}
-function exportCSV(){
-  if(!logs.length){showToast('No data to export');return;}
-  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([getCSVData()],{type:'text/csv'})),download:`born2lift_${today()}.csv`});
-  a.click(); showToast('📄 CSV downloaded');
-}
-function exportExcel(){
-  if(!logs.length){showToast('No data to export');return;}
-  const h=['Date','Category','Muscle Group','Exercise','Sets','Reps','Weight (lbs)','Effort','Notes'];
   const rows=logs.map(l=>[
     l.date,
-    MUSCLE_CATEGORY[l.muscle]||'',
     l.muscle,
     l.exercise,
     l.sets,
     l.reps,
     l.weight,
     l.effort||'',
-    l.notes||''
+    `"${(l.notes||'').replace(/"/g,'""')}"`
   ]);
-  // Build clean SpreadsheetML with proper encoding
-  const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  const toRow = cells => `<Row>${cells.map(c=>`<Cell><Data ss:Type="String">${esc(c)}</Data></Cell>`).join('')}</Row>`;
-  const xml = [
-    `<?xml version="1.0" encoding="UTF-8"?>`,
-    `<?mso-application progid="Excel.Sheet"?>`,
-    `<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"`,
-    ` xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"`,
-    ` xmlns:x="urn:schemas-microsoft-com:office:excel">`,
-    `<Styles><Style ss:ID="h"><Font ss:Bold="1"/><Interior ss:Color="#f0fdf4" ss:Pattern="Solid"/></Style></Styles>`,
-    `<Worksheet ss:Name="Born2Lift"><Table>`,
-    `<Row>${h.map(c=>`<Cell ss:StyleID="h"><Data ss:Type="String">${esc(c)}</Data></Cell>`).join('')}</Row>`,
-    ...rows.map(r=>toRow(r)),
-    `</Table></Worksheet></Workbook>`
-  ].join('\n');
-  const blob = new Blob([xml], {type:'application/vnd.ms-excel;charset=utf-8'});
-  const a = Object.assign(document.createElement('a'),{
-    href: URL.createObjectURL(blob),
-    download: `born2lift_${today()}.xls`
+  return [h,...rows].map(r=>r.join(',')).join('\n');
+}
+function exportCSV(){
+  if(!logs.length){showToast('No data to export');return;}
+  const a=Object.assign(document.createElement('a'),{
+    href:URL.createObjectURL(new Blob([getCSVData()],{type:'text/csv;charset=utf-8'})),
+    download:`born2lift_${today()}.csv`
   });
-  a.click();
-  showToast('📊 Excel downloaded');
+  a.click(); showToast('📄 CSV downloaded');
 }
 
 
