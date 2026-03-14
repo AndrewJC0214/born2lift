@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <title>Born2Lift</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f7f8fa;--surface:#fff;--surface2:#f0f2f6;
+      --border:#e8eaf0;--border-strong:#c8ccd8;
+      --text:#0d0f14;--text-secondary:#64687a;--text-light:#9ea3b5;
+      --green:#22c55e;--green-dark:#16a34a;--green-bg:#f0fdf4;
+      --blue:#3b82f6;--blue-bg:#eff6ff;
+      --purple:#8b5cf6;--purple-bg:#f5f3ff;
+      --red:#ef4444;--red-bg:#fef2f2;
+      --amber:#f59e0b;--amber-bg:#fffbeb;
+      --nav-h:68px;--header-h:64px;
+      --radius:16px;--radius-sm:10px;--radius-xs:7px;
+      --font-display:'Syne',sans-serif;--font-body:'Inter',sans-serif;
+      --shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+      --shadow-lg:0 10px 30px rgba(0,0,0,.12);
+    }
+    html,body{height:100%;overflow:hidden}
+    body{font-family:var(--font-body);background:var(--bg);color:var(--text);max-width:480px;margin:0 auto;display:flex;flex-direction:column;height:100%}
+
+    /* HEADER */
+    header{background:var(--surface);border-bottom:1px solid var(--border);height:var(--header-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0;z-index:10}
+    .logo-wrap{display:flex;align-items:center;gap:10px}
+    .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(34,197,94,.35)}
+    .logo-icon svg{width:20px;height:20px}
+    .logo-text{font-family:var(--font-display);font-size:19px;font-weight:800;letter-spacing:-.01em}
+    .logo-text span{color:var(--green)}
+    .header-date-chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:500;color:var(--text-secondary)}
+
+    /* MAIN */
+    main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav-h) + 8px)}
+    .view{display:none}.view.active{display:block}
+
+    /* ── UNIFIED TAB HERO ───────────────────────────────────────── */
+    .tab-hero{padding:26px 20px 24px;position:relative;overflow:hidden}
+    .tab-hero::before{content:'';position:absolute;top:-50px;right:-40px;width:200px;height:200px;border-radius:50%;opacity:1}
+    .tab-hero::after{content:'';position:absolute;bottom:-30px;left:-10px;width:120px;height:120px;border-radius:50%;opacity:1}
+    .tab-hero-title{font-family:var(--font-display);font-size:28px;font-weight:800;color:#fff;letter-spacing:-.025em;line-height:1.1}
+    .tab-hero-title span{/* accent color set per-tab */}
+
+    /* Log — green */
+    .hero-log{background:linear-gradient(135deg,#0d0f14 0%,#1a2035 60%,#1e2d20 100%)}
+    .hero-log::before{background:radial-gradient(circle,rgba(34,197,94,.22) 0%,transparent 70%)}
+    .hero-log::after{background:radial-gradient(circle,rgba(59,130,246,.1) 0%,transparent 70%)}
+    .hero-log .tab-hero-title span{color:#4ade80}
+
+    /* History — purple */
+    .hero-history{background:linear-gradient(135deg,#12102a,#1a1f3a 60%,#120f22 100%)}
+    .hero-history::before{background:radial-gradient(circle,rgba(139,92,246,.25) 0%,transparent 70%)}
+    .hero-history::after{background:radial-gradient(circle,rgba(59,130,246,.1) 0%,transparent 70%)}
+    .hero-history .tab-hero-title span{color:#a78bfa}
+
+    /* Exercises — blue */
+    .hero-exercises{background:linear-gradient(135deg,#0d1220,#0f1a30 60%,#12102a 100%)}
+    .hero-exercises::before{background:radial-gradient(circle,rgba(59,130,246,.25) 0%,transparent 70%)}
+    .hero-exercises::after{background:radial-gradient(circle,rgba(139,92,246,.1) 0%,transparent 70%)}
+    .hero-exercises .tab-hero-title span{color:#60a5fa}
+    /* Exercises hero needs room for the Add button */
+    .hero-exercises{display:flex;align-items:center;justify-content:space-between;padding:22px 20px 22px}
+    .ex-add-global-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:var(--radius-sm);padding:9px 14px;font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;backdrop-filter:blur(8px);transition:background .15s;flex-shrink:0;position:relative;z-index:1}
+    .ex-add-global-btn:active{background:rgba(255,255,255,.18)}
+
+    /* Analyze — teal */
+    .hero-analyze{background:linear-gradient(135deg,#071a14,#0d1f2a 60%,#0a1220 100%)}
+    .hero-analyze::before{background:radial-gradient(circle,rgba(45,212,191,.2) 0%,transparent 70%)}
+    .hero-analyze::after{background:radial-gradient(circle,rgba(59,130,246,.1) 0%,transparent 70%)}
+    .hero-analyze .tab-hero-title span{color:#2dd4bf}
+
+    /* Export — emerald */
+    .hero-export{background:linear-gradient(135deg,#071a0e,#0d2015 60%,#071a14 100%)}
+    .hero-export::before{background:radial-gradient(circle,rgba(34,197,94,.22) 0%,transparent 70%)}
+    .hero-export::after{background:radial-gradient(circle,rgba(16,185,129,.12) 0%,transparent 70%)}
+    .hero-export .tab-hero-title span{color:#34d399}
+
+    /* Log hero date selector (kept inside log hero) */
+    .date-selector{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:10px 14px;backdrop-filter:blur(8px)}
+    .date-selector svg{width:16px;height:16px;color:var(--green);flex-shrink:0}
+    .date-selector input[type="date"]{background:none;border:none;outline:none;font-family:var(--font-body);font-size:14px;font-weight:500;color:#fff;cursor:pointer;flex:1}
+    .date-selector input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.5);cursor:pointer}
+
+    /* INSIGHT CARD */
+    .insight-card{margin:16px 20px 0;border-radius:var(--radius);padding:14px 16px;position:relative;overflow:hidden;min-height:72px;display:flex;align-items:flex-start;gap:12px}
+    .insight-card.quote-style{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(139,92,246,.3)}
+    .insight-card.fact-style{background:linear-gradient(135deg,#0a1f14,#0f2a1a);border:1px solid rgba(34,197,94,.3)}
+    .insight-icon{font-size:22px;flex-shrink:0;margin-top:1px}
+    .insight-body{flex:1}
+    .insight-type-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+    .quote-style .insight-type-label{color:rgba(139,92,246,.9)}
+    .fact-style .insight-type-label{color:rgba(34,197,94,.9)}
+    .insight-text{font-size:12.5px;line-height:1.55;color:rgba(255,255,255,.85);font-style:italic}
+    .insight-source{font-size:10.5px;color:rgba(255,255,255,.4);margin-top:5px;font-style:normal;font-weight:500}
+    .insight-loading{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.4);font-size:12px}
+    .dot-pulse{display:flex;gap:4px}
+    .dot-pulse span{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.3);animation:dpulse 1.2s infinite ease-in-out}
+    .dot-pulse span:nth-child(2){animation-delay:.2s}
+    .dot-pulse span:nth-child(3){animation-delay:.4s}
+    @keyframes dpulse{0%,80%,100%{transform:scale(.6);opacity:.3}40%{transform:scale(1);opacity:1}}
+    .insight-refresh{position:absolute;top:10px;right:12px;background:none;border:none;cursor:pointer;color:rgba(255,255,255,.25);font-size:16px;transition:color .2s,transform .3s;padding:2px}
+    .insight-refresh:hover{color:rgba(255,255,255,.6);transform:rotate(45deg)}
+
+    /* PLATEAU ALERT */
+    .plateau-alert{margin:12px 20px 0;background:linear-gradient(135deg,#2d1a00,#3d2200);border:1px solid rgba(245,158,11,.35);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:flex-start;gap:10px}
+    .plateau-alert-icon{font-size:20px;flex-shrink:0}
+    .plateau-alert-body{flex:1}
+    .plateau-alert-title{font-size:11px;font-weight:700;color:rgba(245,158,11,.95);letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+    .plateau-alert-text{font-size:12px;line-height:1.5;color:rgba(255,255,255,.75)}
+    .plateau-dismiss{background:none;border:none;color:rgba(255,255,255,.3);font-size:16px;cursor:pointer;padding:0;flex-shrink:0;margin-top:-2px}
+
+    /* EXERCISE SEARCH */
+    .ex-search-wrap{margin:14px 20px 0;position:relative}
+    .ex-search-inner{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1.5px solid transparent;border-radius:var(--radius-sm);padding:8px 12px;transition:border-color .2s,background .2s}
+    .ex-search-inner:focus-within{background:#fff;border-color:var(--border-strong)}
+    .ex-search-icon{width:15px;height:15px;color:var(--text-light);flex-shrink:0;transition:color .2s}
+    .ex-search-inner:focus-within .ex-search-icon{color:var(--text-secondary)}
+    .ex-search-input{flex:1;background:none;border:none;outline:none;font-family:var(--font-body);font-size:13px;font-weight:400;color:var(--text);caret-color:var(--green)}
+    .ex-search-input::placeholder{color:var(--text-light);font-weight:400}
+    .ex-search-clear{background:none;border:none;color:var(--text-light);font-size:14px;cursor:pointer;padding:0;line-height:1;flex-shrink:0}
+    .ex-search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);z-index:50;overflow:hidden;max-height:260px;overflow-y:auto}
+    .ex-search-item{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;transition:background .12s;border-bottom:1px solid var(--border)}
+    .ex-search-item:last-child{border-bottom:none}
+    .ex-search-item:active{background:var(--surface2)}
+    .ex-search-item-emoji{font-size:16px;flex-shrink:0}
+    .ex-search-item-info{flex:1}
+    .ex-search-item-name{font-size:13px;font-weight:600;color:var(--text)}
+    .ex-search-item-name mark{background:none;color:var(--green);font-weight:700}
+    .ex-search-item-muscle{font-size:11px;font-weight:500;color:var(--text-light);margin-top:1px}
+    .ex-search-item-arr{color:var(--text-light);font-size:14px;flex-shrink:0}
+    .ex-search-empty{padding:16px 14px;font-size:13px;color:var(--text-light);text-align:center}
+
+
+    .section{padding:20px 20px 0}
+    .section-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:12px}
+
+    /* MUSCLE CHIPS */
+    .muscle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 20px 4px;margin:4px 0 0}
+    .muscle-chip{display:flex;align-items:center;gap:7px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:all .18s;box-shadow:var(--shadow-sm);width:100%}
+    .muscle-chip .chip-emoji{font-size:16px;line-height:1;flex-shrink:0}
+    .muscle-chip span:last-child{flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .muscle-chip:active{transform:scale(.97)}
+    .muscle-chip.active{background:var(--text);border-color:var(--text);color:#fff;box-shadow:0 3px 10px rgba(13,15,20,.25)}
+
+    /* EXERCISE CARDS */
+    .exercise-section{padding:20px 20px 0}
+    .exercise-list{display:flex;flex-direction:column;gap:10px}
+    .exercise-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);transition:border-color .18s,box-shadow .18s}
+    .exercise-card.open{border-color:var(--green);box-shadow:0 0 0 3px rgba(34,197,94,.1),var(--shadow-sm)}
+    .exercise-card-header{padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+    .exercise-icon{width:38px;height:38px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .exercise-text{flex:1}
+    .exercise-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
+    .exercise-muscle-tag{font-size:11px;font-weight:500;color:var(--text-light)}
+    .expand-icon{width:18px;height:18px;color:var(--text-light);transition:transform .22s;flex-shrink:0}
+    .exercise-card.open .expand-icon{transform:rotate(180deg)}
+    .exercise-form{display:none;padding:4px 16px 16px}
+    .exercise-card.open .exercise-form{display:block}
+    .form-divider{height:1px;background:var(--border);margin-bottom:14px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+    .field-group{display:flex;flex-direction:column;gap:5px}
+    .field-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-light)}
+    .field-input{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:9px 10px;font-family:var(--font-body);font-size:14px;font-weight:500;color:var(--text);outline:none;width:100%;transition:border-color .15s}
+    .field-input:focus{border-color:var(--green);background:#fff}
+    .field-input::placeholder{color:var(--border-strong)}
+    .stepper{display:flex;align-items:center;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-xs);overflow:hidden;transition:border-color .15s}
+    .stepper:focus-within{border-color:var(--green);background:#fff}
+    .stepper-btn{background:none;border:none;width:30px;height:38px;font-size:17px;color:var(--text-secondary);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .1s}
+    .stepper-btn:active{background:var(--border)}
+    .stepper-input{border:none!important;border-left:1px solid var(--border)!important;border-right:1px solid var(--border)!important;border-radius:0!important;background:transparent!important;text-align:center;padding:9px 2px!important;width:0;flex:1;min-width:0}
+    .stepper-input:focus{border-color:transparent!important}
+    .stepper-input::-webkit-outer-spin-button,.stepper-input::-webkit-inner-spin-button{-webkit-appearance:none}
+    .stepper-input[type=number]{-moz-appearance:textfield}
+    .notes-input{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:9px 11px;font-family:var(--font-body);font-size:13px;color:var(--text);outline:none;width:100%;resize:none;min-height:52px;transition:border-color .15s}
+    .notes-input:focus{border-color:var(--green);background:#fff}
+    .notes-input::placeholder{color:var(--border-strong)}
+
+    /* EFFORT SELECTOR */
+    .effort-row{display:flex;gap:6px;margin-bottom:12px}
+    .effort-btn{flex:1;border:1.5px solid var(--border);background:var(--surface2);border-radius:var(--radius-xs);padding:8px 4px;font-size:11px;font-weight:600;text-align:center;cursor:pointer;transition:all .15s;line-height:1.3;color:var(--text-secondary)}
+    .effort-btn .eff-emoji{display:block;font-size:16px;margin-bottom:3px}
+    .effort-btn.selected-struggled{border-color:#ef4444;background:#fef2f2;color:#ef4444}
+    .effort-btn.selected-passed{border-color:#22c55e;background:#f0fdf4;color:#16a34a}
+    .effort-btn.selected-ease{border-color:#3b82f6;background:#eff6ff;color:#2563eb}
+    .effort-btn.selected-failed{border-color:#6b7280;background:#f9fafb;color:#374151}
+
+    .log-btn{width:100%;background:linear-gradient(135deg,var(--green),var(--green-dark));color:white;border:none;border-radius:var(--radius-xs);padding:12px;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;margin-top:4px;box-shadow:0 2px 8px rgba(34,197,94,.3);transition:opacity .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:6px}
+    .log-btn:active{opacity:.88;transform:scale(.99)}
+    .muscle-prompt{text-align:center;padding:40px 20px;color:var(--text-light)}
+    .muscle-prompt .prompt-emoji{font-size:40px;display:block;margin-bottom:10px}
+    .muscle-prompt p{font-size:13px}
+
+    /* HISTORY */
+    .filter-bar{padding:14px 20px 0;display:flex;gap:8px;align-items:center}
+    .filter-select{flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 30px 9px 12px;font-family:var(--font-body);font-size:13px;font-weight:500;color:var(--text);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ea3b5' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+    .filter-select:focus{border-color:var(--purple)}
+    .sort-toggle{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:12px;font-weight:600;color:var(--text-secondary);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:border-color .15s,color .15s}
+    .sort-toggle.active{border-color:var(--purple);color:var(--purple);background:var(--purple-bg)}
+    .date-filter-bar{padding:10px 20px 0;border-bottom:1px solid var(--border)}
+    .date-filter-modes{display:flex;gap:6px;margin-bottom:10px}
+    .date-mode-btn{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:20px;padding:6px 4px;font-family:var(--font-body);font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer;transition:all .15s;white-space:nowrap}
+    .date-mode-btn.active{background:var(--purple);border-color:var(--purple);color:#fff}
+    .date-filter-inputs{padding-bottom:10px}
+    .date-input-row{display:flex;align-items:center;gap:8px}
+    .date-filter-input{flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-family:var(--font-body);font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
+    .date-filter-input:focus{border-color:var(--purple)}
+    .date-range-sep{font-size:14px;font-weight:600;color:var(--text-light);flex-shrink:0}
+padding:18px 20px 8px;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-light)}
+    .history-entry{margin:0 20px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow-sm)}
+    .history-entry.editable{border-color:rgba(139,92,246,.2)}
+    .history-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+    .history-ex-icon{width:34px;height:34px;border-radius:var(--radius-xs);display:flex;align-items:center;justify-content:center;font-size:16px;margin-right:10px;flex-shrink:0}
+    .history-ex-info{flex:1}
+    .history-name{font-size:14px;font-weight:600;margin-bottom:3px}
+    .history-muscle-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-radius:5px;padding:2px 7px}
+    .history-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+    .history-date-label{font-size:11px;font-weight:500;color:var(--text-light);white-space:nowrap}
+    .history-actions{display:flex;gap:5px}
+    .action-btn{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-size:13px}
+    .action-btn.edit-btn:active{border-color:var(--purple);background:var(--purple-bg)}
+    .action-btn.del-btn:active{border-color:var(--red);background:var(--red-bg)}
+    .history-stats-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .stat-badge{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:12px;font-weight:500;color:var(--text-secondary);display:flex;align-items:center;gap:4px}
+    .stat-badge strong{color:var(--text);font-weight:600}
+    .effort-badge{border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+    .effort-badge.struggled{background:#fef2f2;color:#ef4444}
+    .effort-badge.passed{background:#f0fdf4;color:#16a34a}
+    .effort-badge.ease{background:#eff6ff;color:#2563eb}
+    .effort-badge.failed{background:#f9fafb;color:#374151}
+    .history-notes-text{margin-top:9px;padding-top:9px;border-top:1px solid var(--border);font-size:12px;color:var(--text-secondary);font-style:italic}
+    .history-empty{text-align:center;padding:60px 20px;color:var(--text-secondary)}
+    .history-empty .empty-icon{font-size:48px;display:block;margin-bottom:12px}
+    .history-empty p{font-size:14px}
+
+    /* EDIT FORM */
+    .edit-form{display:none;background:var(--surface2);border-radius:var(--radius-sm);padding:12px;margin-top:12px;border:1.5px solid var(--purple)}
+    .edit-form.open{display:block}
+    .edit-form .stepper:focus-within{border-color:var(--purple);background:#fff}
+    .edit-form .field-input:focus{border-color:var(--purple);background:#fff}
+    .edit-form .notes-input:focus{border-color:var(--purple);background:#fff}
+    .edit-actions{display:flex;gap:8px;margin-top:10px}
+    .edit-save-btn{flex:1;background:var(--purple);color:#fff;border:none;border-radius:var(--radius-xs);padding:10px;font-size:13px;font-weight:600;cursor:pointer}
+    .edit-cancel-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:10px 14px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text-secondary)}
+
+    /* CONFIRM */
+    .confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:flex-end;justify-content:center}
+    .confirm-overlay.open{display:flex}
+    .confirm-sheet{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;box-shadow:var(--shadow-lg)}
+    .confirm-title{font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:6px}
+    .confirm-sub{font-size:13px;color:var(--text-secondary);margin-bottom:20px}
+    .confirm-btns{display:flex;gap:10px}
+    .confirm-del{flex:1;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);padding:13px;font-size:14px;font-weight:600;cursor:pointer}
+    .confirm-cancel{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:13px;font-size:14px;font-weight:500;cursor:pointer}
+
+    /* EXERCISES MANAGEMENT TAB */
+
+    .ex-mgmt-section{padding:12px 20px 0}
+    .ex-mgmt-group{margin-bottom:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)}
+    .ex-mgmt-group-header{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;user-select:none;transition:background .15s}
+    .ex-mgmt-group-header:active{background:var(--surface2)}
+    .ex-mgmt-group-emoji{font-size:18px;flex-shrink:0}
+    .ex-mgmt-group-name{font-family:var(--font-display);font-size:14px;font-weight:700;flex:1}
+    .ex-mgmt-group-count{font-size:11px;font-weight:500;color:var(--text-light);background:var(--surface2);border-radius:12px;padding:2px 9px;flex-shrink:0}
+    .ex-mgmt-group-chevron{width:18px;height:18px;color:var(--text-light);transition:transform .22s;flex-shrink:0}
+    .ex-mgmt-group.open .ex-mgmt-group-chevron{transform:rotate(180deg)}
+    .ex-mgmt-group-del{width:26px;height:26px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;flex-shrink:0}
+
+    .ex-mgmt-body{display:none;padding:0 12px 12px;border-top:1px solid var(--border)}
+    .ex-mgmt-group.open .ex-mgmt-body{display:block}
+
+    .ex-mgmt-item{background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-top:8px;display:flex;align-items:center;gap:10px}
+    .ex-mgmt-name{flex:1;font-size:13px;font-weight:500;color:var(--text)}
+    .ex-mgmt-name.editing{display:none}
+    .ex-mgmt-edit-input{flex:1;border:1.5px solid var(--purple);border-radius:var(--radius-xs);padding:6px 10px;font-family:var(--font-body);font-size:13px;font-weight:500;color:var(--text);outline:none;background:#fff;display:none}
+    .ex-mgmt-edit-input.editing{display:block}
+    .ex-mgmt-actions{display:flex;gap:5px;flex-shrink:0}
+    .ex-mgmt-btn{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:all .15s}
+    .ex-mgmt-btn.save{border-color:var(--purple);background:var(--purple);color:#fff;font-size:14px}
+    .ex-mgmt-btn.cancel{border-color:var(--border);font-size:14px}
+    .ex-mgmt-btn:active{opacity:.8}
+
+    .ex-inline-add{display:flex;gap:8px;margin-top:10px}
+    .ex-inline-add-input{flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-family:var(--font-body);font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
+    .ex-inline-add-input:focus{border-color:var(--blue);background:#fff}
+    .ex-inline-add-input::placeholder{color:var(--border-strong)}
+    .ex-inline-add-btn{background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);padding:9px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+    .ex-inline-add-btn:active{opacity:.85}
+
+    .add-muscle-group-section{padding:16px 20px 24px}
+    .add-muscle-row{display:flex;gap:8px}
+    .add-muscle-input{flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:var(--font-body);font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
+    .add-muscle-input:focus{border-color:var(--blue);background:#fff}
+    .add-muscle-btn{background:var(--text);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s}
+    .add-muscle-btn:active{opacity:.8}
+
+    /* EXPORT */
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:20px 20px 0}
+    .stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 12px;text-align:center;box-shadow:var(--shadow-sm)}
+    .stat-card-icon{font-size:20px;display:block;margin-bottom:6px}
+    .stat-card-num{display:block;font-family:var(--font-display);font-size:24px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px}
+    .stat-card-label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-light)}
+    .export-options{padding:20px 20px 0}
+    .export-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 16px;margin-bottom:12px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .1s;box-shadow:var(--shadow-sm)}
+    .export-card:active{transform:scale(.99);border-color:var(--green);box-shadow:0 0 0 3px rgba(34,197,94,.1)}
+    .export-file-icon{width:46px;height:46px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .export-file-icon.csv{background:linear-gradient(135deg,#dcfce7,#bbf7d0)}
+    .export-file-icon.xlsx{background:linear-gradient(135deg,#dbeafe,#bfdbfe)}
+    .export-info{flex:1}
+    .export-info h3{font-size:15px;font-weight:600;margin-bottom:3px}
+    .export-info p{font-size:12px;color:var(--text-secondary)}
+    .export-arrow{color:var(--text-light);flex-shrink:0}
+
+    /* NAV */
+    nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:1px solid var(--border);display:flex;height:var(--nav-h);z-index:100;box-shadow:0 -4px 20px rgba(0,0,0,.06);align-items:center}
+    nav button{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text-light);font-family:var(--font-body);font-size:9px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;transition:color .15s;padding:0;height:100%}
+    nav button .nav-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:background .15s,transform .15s}
+    nav button svg{width:20px;height:20px;stroke-width:1.8}
+    nav button.active{color:var(--green-dark)}
+    nav button.active .nav-icon{background:var(--green-bg);transform:translateY(-1px)}
+    nav button.active svg{stroke:var(--green-dark)}
+    /* Center Log button — raised FAB style */
+    nav button:nth-child(3){position:relative;top:-10px}
+    nav button:nth-child(3) .nav-icon{width:50px;height:50px;border-radius:16px;background:linear-gradient(135deg,var(--green),var(--green-dark));box-shadow:0 4px 14px rgba(34,197,94,.45);transform:none}
+    nav button:nth-child(3) svg{width:22px;height:22px;stroke:white;stroke-width:2}
+    nav button:nth-child(3){color:var(--text-secondary)}
+    nav button:nth-child(3).active .nav-icon{background:linear-gradient(135deg,var(--green),var(--green-dark));transform:none;box-shadow:0 4px 18px rgba(34,197,94,.55)}
+    nav button:nth-child(3).active{color:var(--green-dark)}
+    nav button:nth-child(3).active svg{stroke:white}
+
+    /* BACKUP & RESTORE */
+    .backup-info-card{display:flex;align-items:flex-start;gap:10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px}
+
+    /* GOOGLE DRIVE SYNC */
+    .gdrive-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm)}
+    .gdrive-top{display:flex;align-items:center;gap:12px}
+    .gdrive-icon{width:40px;height:40px;background:var(--surface2);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .gdrive-info{flex:1}
+    .gdrive-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
+    .gdrive-status{font-size:12px;color:var(--text-light);font-weight:500}
+    .gdrive-status.connected{color:var(--green-dark)}
+    .gdrive-connect-btn{background:linear-gradient(135deg,#4285f4,#1a73e8);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 16px;font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s}
+    .gdrive-connect-btn:active{opacity:.85}
+    .gdrive-body{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+    .gdrive-sync-row{display:flex;gap:8px}
+    .gdrive-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 6px;font-family:var(--font-body);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s}
+    .gdrive-btn-up{background:var(--green-bg);border-color:rgba(34,197,94,.3);color:var(--green-dark)}
+    .gdrive-btn-up svg{stroke:var(--green-dark)}
+    .gdrive-btn-down{background:var(--blue-bg);border-color:rgba(59,130,246,.3);color:#1d4ed8}
+    .gdrive-btn-down svg{stroke:#1d4ed8}
+    .gdrive-btn-out{background:var(--surface2);color:var(--text-secondary)}
+    .gdrive-btn:active{opacity:.8}
+    .gdrive-last-sync{margin-top:10px;font-size:11px;color:var(--text-light);text-align:center}
+    .backup-info-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+    .backup-info-card p{font-size:12px;color:var(--text-secondary);line-height:1.55}
+    .restore-card{border-style:dashed}
+    .restore-warning{display:flex;align-items:flex-start;gap:10px;margin-top:12px;padding:12px 14px;background:var(--amber-bg);border:1.5px solid rgba(245,158,11,.3);border-radius:var(--radius-sm);line-height:1.5}
+    .restore-warning svg{flex-shrink:0;stroke:#d97706;margin-top:1px}
+    .restore-warning span{font-size:12px;color:#92400e;flex:1}
+
+
+    .hero-title span.teal{color:#2dd4bf}
+
+    /* QUICK STATS GRID */
+    .az-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px 0}
+    .az-stat{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+    .az-stat-glow{position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.18}
+    .az-stat-icon{font-size:18px;margin-bottom:6px;display:block}
+    .az-stat-num{font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--text);line-height:1;letter-spacing:-.02em}
+    .az-stat-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-light);margin-top:4px}
+    .az-stat-sub{font-size:11px;font-weight:500;color:var(--text-secondary);margin-top:3px}
+    .az-stat-trend{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;border-radius:5px;padding:2px 6px;margin-top:5px}
+    .az-stat-trend.up{background:var(--green-bg);color:var(--green-dark)}
+    .az-stat-trend.down{background:var(--red-bg);color:var(--red)}
+    .az-stat-trend.flat{background:var(--surface2);color:var(--text-light)}
+
+    /* SECTION HEADERS */
+    .az-section{padding:20px 20px 0}
+    .az-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .az-section-title{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text)}
+    .az-section-sub{font-size:11px;font-weight:500;color:var(--text-light)}
+
+    /* MUSCLE BALANCE CHART */
+    .az-chart-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);margin:0 20px}
+    .az-chart-title{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-light);margin-bottom:12px}
+    .az-chart-wrap{position:relative;height:200px;width:100%}
+    .az-donut-wrap{display:flex;align-items:center;gap:16px}
+    .az-donut-canvas{position:relative;height:160px;width:160px;flex-shrink:0}
+    .az-donut-legend{flex:1;display:flex;flex-direction:column;gap:6px}
+    .az-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:var(--text-secondary)}
+    .az-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .az-legend-val{margin-left:auto;font-weight:600;color:var(--text);font-size:11px}
+
+    /* EXERCISE DRILL DOWN */
+    .az-exercise-select-wrap{padding:0 20px;margin-bottom:0}
+    .az-exercise-select{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 32px 11px 14px;font-family:var(--font-body);font-size:13px;font-weight:500;color:var(--text);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ea3b5' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;box-shadow:var(--shadow-sm)}
+    .az-exercise-select:focus{border-color:var(--green)}
+
+    .az-drill-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);margin:12px 20px 0}
+    .az-drill-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+    .az-drill-stat{background:var(--surface2);border-radius:var(--radius-sm);padding:10px 8px;text-align:center}
+    .az-drill-stat-num{font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--text)}
+    .az-drill-stat-lbl{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-light);margin-top:3px}
+
+    .az-pr-banner{background:linear-gradient(135deg,#1a1f3a,#0f1629);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+    .az-pr-icon{font-size:22px;flex-shrink:0}
+    .az-pr-body{}
+    .az-pr-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(139,92,246,.9);margin-bottom:2px}
+    .az-pr-val{font-family:var(--font-display);font-size:18px;font-weight:800;color:#fff}
+    .az-pr-date{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px}
+
+    .az-effort-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+    .az-effort-pill{display:flex;align-items:center;gap:4px;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600}
+    .az-effort-pill.struggled{background:#fef2f2;color:#ef4444}
+    .az-effort-pill.ease{background:#eff6ff;color:#2563eb}
+    .az-effort-pill.failed{background:#f9fafb;color:#374151}
+
+    .az-line-wrap{position:relative;height:160px;width:100%}
+
+    /* AI FEEDBACK CARD */
+    .az-ai-card{margin:12px 20px 0;background:linear-gradient(135deg,#0a1428,#150a28);border:1px solid rgba(139,92,246,.25);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden}
+    .az-ai-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(139,92,246,.2) 0%,transparent 70%);border-radius:50%}
+    .az-ai-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+    .az-ai-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .az-ai-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(139,92,246,.9)}
+    .az-ai-title{font-family:var(--font-display);font-size:13px;font-weight:700;color:#fff;margin-top:1px}
+    .az-ai-body{font-size:13px;line-height:1.65;color:rgba(255,255,255,.78)}
+    .az-ai-body p{margin-bottom:8px}
+    .az-ai-body p:last-child{margin-bottom:0}
+    .az-ai-loading{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.35);font-size:12px}
+    .az-ai-refresh{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:rgba(255,255,255,.45);font-size:11px;font-weight:600;padding:5px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;margin-top:12px;transition:background .15s}
+    .az-ai-refresh:hover{background:rgba(255,255,255,.12)}
+
+    /* STREAK CARD */
+    .az-streak-card{background:linear-gradient(135deg,#1f1200,#2d1a00);border:1px solid rgba(245,158,11,.25);border-radius:var(--radius);padding:14px 16px;margin:12px 20px 0;display:flex;align-items:center;gap:14px}
+    .az-streak-flame{font-size:36px;line-height:1}
+    .az-streak-info{}
+    .az-streak-num{font-family:var(--font-display);font-size:30px;font-weight:800;color:#fbbf24;line-height:1}
+    .az-streak-lbl{font-size:11px;font-weight:600;color:rgba(255,255,255,.5);margin-top:3px}
+    .az-streak-sub{font-size:11px;color:rgba(245,158,11,.7);margin-top:2px}
+
+    /* EMPTY STATE */
+    .az-empty{text-align:center;padding:50px 30px;color:var(--text-secondary)}
+    .az-empty-icon{font-size:52px;display:block;margin-bottom:14px}
+    .az-empty p{font-size:14px;line-height:1.6}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:calc(var(--nav-h) + 14px);left:50%;transform:translateX(-50%) translateY(12px);background:var(--text);color:white;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .22s ease;pointer-events:none;white-space:nowrap;z-index:200;box-shadow:var(--shadow-lg)}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round">
+        <path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/>
+      </svg>
+    </div>
+    <div class="logo-text">Born<span>2</span>Lift</div>
+  </div>
+  <div class="header-date-chip" id="headerDate"></div>
+</header>
+
+<main>
+
+  <!-- ══ LOG VIEW ══ -->
+  <div class="view active" id="view-log">
+    <div class="tab-hero hero-log">
+      <div class="tab-hero-title">Log a <span>Set</span></div>
+      <div class="date-selector" style="margin-top:16px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <input type="date" id="logDate"/>
+      </div>
+    </div>
+    <div class="insight-card quote-style" id="insightCard">
+      <div class="insight-icon" id="insightIcon">💬</div>
+      <div class="insight-body">
+        <div class="insight-type-label" id="insightTypeLabel">Quote</div>
+        <div id="insightContent"><div class="insight-loading"><div class="dot-pulse"><span></span><span></span><span></span></div><span>Loading…</span></div></div>
+      </div>
+      <button class="insight-refresh" onclick="fetchInsight()" title="Refresh">↻</button>
+    </div>
+
+    <!-- Plateau alerts -->
+    <div id="plateauAlerts"></div>
+
+    <!-- Exercise search -->
+    <div class="ex-search-wrap">
+      <div class="ex-search-inner">
+        <svg class="ex-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="ex-search-input" id="exSearchInput" type="text" placeholder="Search exercises…" autocomplete="off" oninput="renderExSearch()"/>
+        <button class="ex-search-clear" id="exSearchClear" onclick="clearExSearch()" style="display:none">✕</button>
+      </div>
+      <div class="ex-search-results" id="exSearchResults" style="display:none"></div>
+    </div>
+
+    <div class="section" style="padding-top:16px">
+      <div class="section-label">Muscle Group</div>
+    </div>
+    <div class="muscle-grid" id="muscleChips"></div>
+
+    <div class="exercise-section" id="exerciseSection" style="display:none">
+      <div class="section-label" style="margin-bottom:12px" id="exerciseLabel"></div>
+      <div class="exercise-list" id="exerciseList"></div>
+    </div>
+    <div class="muscle-prompt" id="musclePrompt">
+      <span class="prompt-emoji">💪</span>
+      <p>Pick a muscle group above<br>to see your exercises</p>
+    </div>
+  </div>
+
+  <!-- ══ HISTORY VIEW ══ -->
+  <div class="view" id="view-history">
+    <div class="tab-hero hero-history">
+      <div class="tab-hero-title">Work<span>out</span> History</div>
+    </div>
+    <div class="filter-bar">
+      <select class="filter-select" id="filterExercise" onchange="renderHistory()">
+        <option value="">All Exercises</option>
+      </select>
+      <button class="sort-toggle" id="weightSortBtn" onclick="toggleWeightSort()">⚖️ By Weight</button>
+    </div>
+    <div class="date-filter-bar" id="dateFilterBar">
+      <div class="date-filter-modes">
+        <button class="date-mode-btn active" data-mode="" onclick="setDateMode(this,'')">All</button>
+        <button class="date-mode-btn" data-mode="on"    onclick="setDateMode(this,'on')">On</button>
+        <button class="date-mode-btn" data-mode="before" onclick="setDateMode(this,'before')">Before</button>
+        <button class="date-mode-btn" data-mode="after"  onclick="setDateMode(this,'after')">After</button>
+        <button class="date-mode-btn" data-mode="range"  onclick="setDateMode(this,'range')">Range</button>
+      </div>
+      <div class="date-filter-inputs" id="dateFilterInputs" style="display:none">
+        <div class="date-input-row" id="dateRowSingle">
+          <input type="date" class="date-filter-input" id="dateFilterA" onchange="renderHistory()"/>
+        </div>
+        <div class="date-input-row" id="dateRowRange" style="display:none">
+          <input type="date" class="date-filter-input" id="dateFilterFrom" onchange="renderHistory()"/>
+          <span class="date-range-sep">→</span>
+          <input type="date" class="date-filter-input" id="dateFilterTo" onchange="renderHistory()"/>
+        </div>
+      </div>
+    </div>
+    <div id="historyContent"></div>
+  </div>
+
+  <!-- ══ EXERCISES MANAGEMENT VIEW ══ -->
+  <div class="view" id="view-exercises">
+    <div class="tab-hero hero-exercises">
+      <div class="tab-hero-title">My <span>Exercises</span></div>
+      <button class="ex-add-global-btn" onclick="openAddExSheet()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Exercise
+      </button>
+    </div>
+    <div class="ex-mgmt-section" id="exMgmtContent"></div>
+    <div class="add-muscle-group-section">
+      <div class="section-label" style="margin-bottom:10px">New Muscle Group</div>
+      <div class="add-muscle-row">
+        <input class="add-muscle-input" id="newMuscleInput" placeholder="e.g. Forearms" maxlength="30"/>
+        <button class="add-muscle-btn" onclick="addMuscleGroup()">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Exercise bottom sheet -->
+  <div class="confirm-overlay" id="addExSheet">
+    <div class="confirm-sheet" style="padding-bottom:40px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div class="confirm-title" style="margin-bottom:0">Add Exercise</div>
+        <button onclick="closeAddExSheet()" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;width:30px;height:30px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+      <div class="field-group" style="margin-bottom:12px">
+        <label class="field-label">Exercise Name</label>
+        <input class="field-input" id="globalExName" placeholder="e.g. Incline Bench Press" maxlength="50" style="background:var(--surface2)"/>
+      </div>
+      <div class="field-group" style="margin-bottom:20px">
+        <label class="field-label">Muscle Group</label>
+        <select class="filter-select" id="globalExMuscle" style="width:100%;padding:10px 32px 10px 12px">
+          <option value="">Choose muscle group…</option>
+        </select>
+      </div>
+      <button class="log-btn" onclick="addExerciseGlobal()" style="border-radius:var(--radius-sm);padding:13px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Save Exercise
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ ANALYZE VIEW ══ -->
+  <div class="view" id="view-analyze">
+    <div class="tab-hero hero-analyze">
+      <div class="tab-hero-title">Ana<span>lyze</span></div>
+    </div>
+
+    <!-- empty state -->
+    <div id="az-empty" style="display:none">
+      <div class="az-empty">
+        <span class="az-empty-icon">📊</span>
+        <p>Log a few workouts first.<br>Your analysis will appear here once you have data.</p>
+      </div>
+    </div>
+
+    <div id="az-content">
+      <!-- AI overall feedback — top -->
+      <div class="az-ai-card" id="azOverallAI" style="margin-top:16px">
+        <div class="az-ai-header">
+          <div class="az-ai-icon">🤖</div>
+          <div>
+            <div class="az-ai-label">AI Coach</div>
+            <div class="az-ai-title">Overall Feedback</div>
+          </div>
+        </div>
+        <div class="az-ai-body" id="azOverallAIBody">
+          <div class="az-ai-loading"><div class="dot-pulse"><span></span><span></span><span></span></div><span>Analyzing your training…</span></div>
+        </div>
+        <button class="az-ai-refresh" onclick="fetchOverallFeedback()">↻ Refresh feedback</button>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="az-stats-grid" id="azStatsGrid"></div>
+
+      <!-- Streak -->
+      <div id="azStreakCard"></div>
+
+      <!-- Muscle balance donut -->
+      <div class="az-section">
+        <div class="az-section-header">
+          <span class="az-section-title">Muscle Balance</span>
+          <span class="az-section-sub">sets per group</span>
+        </div>
+      </div>
+      <div class="az-chart-card">
+        <div class="az-donut-wrap">
+          <div class="az-donut-canvas"><canvas id="muscleDonut"></canvas></div>
+          <div class="az-donut-legend" id="muscleLegend"></div>
+        </div>
+      </div>
+
+      <!-- Weekly volume bar -->
+      <div class="az-section">
+        <div class="az-section-header">
+          <span class="az-section-title">Weekly Volume</span>
+          <span class="az-section-sub">total sets / week</span>
+        </div>
+      </div>
+      <div class="az-chart-card">
+        <div class="az-chart-wrap"><canvas id="weeklyBar"></canvas></div>
+      </div>
+
+      <!-- Exercise drill-down -->
+      <div class="az-section" style="padding-bottom:12px">
+        <div class="az-section-header">
+          <span class="az-section-title">Exercise Deep Dive</span>
+        </div>
+        <div class="az-exercise-select-wrap" style="padding:0">
+          <select class="az-exercise-select" id="azExSelect" onchange="renderDrillDown()">
+            <option value="">Choose an exercise…</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="azDrillContent" style="padding-bottom:8px"></div>
+    </div>
+  </div>
+
+
+  <div class="view" id="view-export">
+    <div class="tab-hero hero-export">
+      <div class="tab-hero-title">Export <span>Data</span></div>
+    </div>
+    <div class="stats-grid" id="exportStats"></div>
+    <div class="export-options">
+      <div class="section-label" style="margin-bottom:14px;margin-top:20px">Download As</div>
+      <div class="export-card" onclick="exportCSV()">
+        <div class="export-file-icon csv">📄</div>
+        <div class="export-info"><h3>CSV File</h3><p>Opens in any spreadsheet app</p></div>
+        <div class="export-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+      <div class="export-card" onclick="exportExcel()">
+        <div class="export-file-icon xlsx">📊</div>
+        <div class="export-info"><h3>Excel File (.xlsx)</h3><p>Formatted for Microsoft Excel</p></div>
+        <div class="export-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+
+      <div class="section-label" style="margin-bottom:14px;margin-top:28px">Backup & Restore</div>
+      <div class="backup-info-card">
+        <span class="backup-info-icon">💡</span>
+        <p>A full backup saves everything — your logs, custom exercises, and muscle groups — into a single file. Use it to transfer your data to a new device or browser.</p>
+      </div>
+      <div class="export-card" onclick="exportBackup()">
+        <div class="export-file-icon" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">💾</div>
+        <div class="export-info"><h3>Save Full Backup</h3><p>All logs + exercises as .json</p></div>
+        <div class="export-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+      <div class="export-card restore-card" onclick="document.getElementById('restoreInput').click()">
+        <div class="export-file-icon" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8)">📥</div>
+        <div class="export-info"><h3>Restore from Backup</h3><p>Load a previously saved .json file</p></div>
+        <div class="export-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+      <input type="file" id="restoreInput" accept=".json" style="display:none" onchange="importBackup(event)"/>
+
+      <div class="restore-warning">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Restoring will <strong>replace</strong> all current data. Save a backup first if needed.</span>
+      </div>
+
+      <!-- Google Drive Sync -->
+      <div class="section-label" style="margin-bottom:14px;margin-top:28px">Google Drive Sync</div>
+      <div class="gdrive-card" id="gdriveCard">
+        <div class="gdrive-top">
+          <div class="gdrive-icon">
+            <svg width="22" height="22" viewBox="0 0 87.3 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0a15.92 15.92 0 0 0 2.1 8l4.5-6.15z" fill="#0066da"/>
+              <path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L2.1 46.1A15.92 15.92 0 0 0 0 54.1h27.5L43.65 25z" fill="#00ac47"/>
+              <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25a15.92 15.92 0 0 0 2.1-8H60.7l5.85 11.2 7 16.1z" fill="#ea4335"/>
+              <path d="M43.65 25L57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2L43.65 25z" fill="#00832d"/>
+              <path d="M60.7 54.1H27.5L13.75 77.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.4 4.5-1.2L60.7 54.1z" fill="#2684fc"/>
+              <path d="M73.4 27.05l-12.25-21.2a11.57 11.57 0 0 0-3.75-3.65L43.65 25 60.7 54.1h27.45a15.92 15.92 0 0 0-2.1-8L73.4 27.05z" fill="#ffba00"/>
+            </svg>
+          </div>
+          <div class="gdrive-info">
+            <div class="gdrive-title">Google Drive Sync</div>
+            <div class="gdrive-status" id="gdriveStatus">Not connected</div>
+          </div>
+          <div id="gdriveActions">
+            <button class="gdrive-connect-btn" id="gdriveConnectBtn" onclick="gdriveSignIn()">Connect</button>
+          </div>
+        </div>
+        <div class="gdrive-body" id="gdriveBody" style="display:none">
+          <div class="gdrive-sync-row">
+            <button class="gdrive-btn gdrive-btn-up" onclick="gdriveSave()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+              Save to Drive
+            </button>
+            <button class="gdrive-btn gdrive-btn-down" onclick="gdriveLoad()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg>
+              Load from Drive
+            </button>
+            <button class="gdrive-btn gdrive-btn-out" onclick="gdriveSignOut()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sign out
+            </button>
+          </div>
+          <div class="gdrive-last-sync" id="gdriveLastSync"></div>
+        </div>
+      </div>
+      <div class="restore-warning" style="margin-top:10px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Loading from Drive will <strong>replace</strong> all current data. Save a backup first if needed.</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<nav>
+  <button onclick="switchView('exercises',this)">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></div>
+    Exercises
+  </button>
+  <button onclick="switchView('history',this)">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg></div>
+    History
+  </button>
+  <button class="active" onclick="switchView('log',this)">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg></div>
+    Log
+  </button>
+  <button onclick="switchView('analyze',this)">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    Analyze
+  </button>
+  <button onclick="switchView('export',this)">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+    Export
+  </button>
+</nav>
+
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-sheet">
+    <div class="confirm-title" id="confirmTitle">Delete this set?</div>
+    <div class="confirm-sub" id="confirmSub">This can't be undone.</div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="confirm-del" id="confirmDelBtn" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DEFAULT DATA ─────────────────────────────────────────────
+const DEFAULT_MUSCLE_CONFIG = {
+  "Chest":     {emoji:"🫁",color:"#ef4444",bg:"#fef2f2"},
+  "Back":      {emoji:"🔙",color:"#3b82f6",bg:"#eff6ff"},
+  "Shoulders": {emoji:"🏋️",color:"#8b5cf6",bg:"#f5f3ff"},
+  "Biceps":    {emoji:"💪",color:"#22c55e",bg:"#f0fdf4"},
+  "Triceps":   {emoji:"🦾",color:"#f59e0b",bg:"#fffbeb"},
+  "Legs":      {emoji:"🦵",color:"#06b6d4",bg:"#ecfeff"},
+  "Core":      {emoji:"🎯",color:"#ec4899",bg:"#fdf2f8"},
+  "Cardio":    {emoji:"❤️",color:"#f97316",bg:"#fff7ed"}
+};
+const DEFAULT_EXERCISES = {
+  "Chest":     ["Bench Press","Incline Dumbbell Press","Cable Fly","Push-Up","Chest Dip"],
+  "Back":      ["Pull-Up","Barbell Row","Lat Pulldown","Seated Cable Row","Face Pull"],
+  "Shoulders": ["Overhead Press","Lateral Raise","Front Raise","Arnold Press","Reverse Fly"],
+  "Biceps":    ["Barbell Curl","Hammer Curl","Incline Dumbbell Curl","Cable Curl","Concentration Curl"],
+  "Triceps":   ["Tricep Pushdown","Skull Crusher","Overhead Tricep Extension","Dips","Close-Grip Bench"],
+  "Legs":      ["Squat","Romanian Deadlift","Leg Press","Lunges","Leg Curl","Calf Raise"],
+  "Core":      ["Plank","Hanging Leg Raise","Cable Crunch","Russian Twist","Ab Wheel Rollout"],
+  "Cardio":    ["Treadmill Run","Stationary Bike","Jump Rope","Rowing Machine","Stair Climber"]
+};
+
+// ─── STATE ────────────────────────────────────────────────────
+let logs = JSON.parse(localStorage.getItem('b2l_logs')||'[]');
+let EXERCISES = JSON.parse(localStorage.getItem('b2l_exercises')||JSON.stringify(DEFAULT_EXERCISES));
+let MUSCLE_CONFIG = JSON.parse(localStorage.getItem('b2l_muscle_config')||JSON.stringify(DEFAULT_MUSCLE_CONFIG));
+let weightSortActive = false;
+let dateFilterMode = ''; // '', 'on', 'before', 'after', 'range'
+let pendingDeleteId = null;
+let pendingDeleteType = 'log'; // 'log' | 'exercise' | 'muscle'
+let pendingDeleteMeta = null;
+let insightType = 'fact';
+
+const EFFORT_OPTIONS = [
+  {key:'struggled', label:'Passed &\nStruggled', emoji:'😤', cls:'selected-struggled'},
+  {key:'ease',      label:'Passed\nwith Ease', emoji:'😎', cls:'selected-ease'},
+  {key:'failed',    label:'Failed',             emoji:'❌', cls:'selected-failed'},
+];
+
+// ─── INIT ─────────────────────────────────────────────────────
+function init(){
+  const now = new Date();
+  document.getElementById('headerDate').textContent =
+    now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  document.getElementById('logDate').value = now.toISOString().split('T')[0];
+  buildMuscleChips();
+  renderExportStats();
+  fetchInsight();
+  checkPlateaus();
+}
+
+function buildMuscleChips(){
+  const container = document.getElementById('muscleChips');
+  container.innerHTML = '';
+  Object.keys(EXERCISES).sort((a,b)=>a.localeCompare(b)).forEach(muscle=>{
+    const cfg = getMuscleConfig(muscle);
+    const chip = document.createElement('button');
+    chip.className = 'muscle-chip';
+    chip.innerHTML = `<span class="chip-emoji">${cfg.emoji}</span><span>${muscle}</span>`;
+    chip.onclick = ()=>selectMuscle(muscle,chip);
+    container.appendChild(chip);
+  });
+}
+
+function getMuscleConfig(muscle){
+  return MUSCLE_CONFIG[muscle] || {emoji:'💪',color:'#64687a',bg:'#f0f2f6'};
+}
+
+// ─── PLATEAU DETECTION ───────────────────────────────────────
+function checkPlateaus(){
+  const container = document.getElementById('plateauAlerts');
+  container.innerHTML = '';
+  const today = new Date();
+
+  // Get ISO week string for a date
+  const getWeek = d=>{
+    const dt = new Date(d+'T12:00:00');
+    const day = dt.getDay()||7;
+    dt.setDate(dt.getDate()+4-day);
+    const y = dt.getFullYear();
+    const w = Math.ceil(((dt-new Date(y,0,1))/86400000+1)/7);
+    return `${y}-W${String(w).padStart(2,'0')}`;
+  };
+
+  // Group logs by exercise+week, track max weight per week
+  const byExWeek = {};
+  logs.forEach(l=>{
+    if(!l.weight || l.weight==='—') return;
+    const w = parseFloat(l.weight); if(isNaN(w)||w===0) return;
+    const key = l.exercise;
+    if(!byExWeek[key]) byExWeek[key]={};
+    const wk = getWeek(l.date);
+    if(!byExWeek[key][wk] || byExWeek[key][wk]<w) byExWeek[key][wk]=w;
+  });
+
+  const thisWeek = getWeek(new Date().toISOString().split('T')[0]);
+  const lastWeek = getWeek(new Date(Date.now()-7*86400000).toISOString().split('T')[0]);
+
+  const plateaus = [];
+  Object.entries(byExWeek).forEach(([ex,weeks])=>{
+    const tw = weeks[thisWeek], lw = weeks[lastWeek];
+    if(tw!==undefined && lw!==undefined && tw===lw){
+      plateaus.push({exercise:ex, weight:tw});
+    }
+  });
+
+  plateaus.forEach(p=>{
+    const div = document.createElement('div');
+    div.className = 'plateau-alert';
+    div.innerHTML = `
+      <div class="plateau-alert-icon">🔥</div>
+      <div class="plateau-alert-body">
+        <div class="plateau-alert-title">Time to level up!</div>
+        <div class="plateau-alert-text"><strong>${p.exercise}</strong> — you've lifted <strong>${p.weight} lbs</strong> two weeks in a row. Consider bumping the weight next session!</div>
+      </div>
+      <button class="plateau-dismiss" onclick="this.closest('.plateau-alert').remove()">✕</button>`;
+    container.appendChild(div);
+  });
+}
+
+// ─── AI INSIGHT ───────────────────────────────────────────────
+async function fetchInsight(){
+  insightType = insightType==='quote'?'fact':'quote';
+  const card=document.getElementById('insightCard'), icon=document.getElementById('insightIcon'),
+        label=document.getElementById('insightTypeLabel'), content=document.getElementById('insightContent');
+  card.className=`insight-card ${insightType==='quote'?'quote-style':'fact-style'}`;
+  icon.textContent=insightType==='quote'?'💬':'🧠';
+  label.textContent=insightType==='quote'?'Quote':'Fun Fact';
+  content.innerHTML=`<div class="insight-loading"><div class="dot-pulse"><span></span><span></span><span></span></div><span>Loading…</span></div>`;
+  const prompt = insightType==='quote'
+    ?`Give me one real verified inspirational quote about fitness, hard work, discipline, or living better. Respond ONLY with JSON (no markdown): {"quote":"...","author":"..."}`
+    :`Give me one short true fun fact. Random topic from: animals, video games, New York City, Mexico, Spanish language, English language, food, travel, clothing/fashion. Respond ONLY with JSON (no markdown): {"fact":"...","topic":"..."}`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const parsed=JSON.parse((data.content?.[0]?.text||'').replace(/```json|```/g,'').trim());
+    content.innerHTML = insightType==='quote'
+      ?`<div class="insight-text">"${parsed.quote}"</div><div class="insight-source">— ${parsed.author}</div>`
+      :`<div class="insight-text">${parsed.fact}</div><div class="insight-source">📌 ${parsed.topic}</div>`;
+  }catch{content.innerHTML=`<div class="insight-text" style="color:rgba(255,255,255,.45);font-style:normal">Tap ↻ to reload</div>`;}
+}
+
+// ─── EXERCISE SEARCH ─────────────────────────────────────────
+function renderExSearch(){
+  const q = document.getElementById('exSearchInput').value.trim().toLowerCase();
+  const results = document.getElementById('exSearchResults');
+  const clear = document.getElementById('exSearchClear');
+  clear.style.display = q ? 'block' : 'none';
+  if(!q){ results.style.display='none'; return; }
+
+  // Search all exercises across all muscle groups
+  const matches = [];
+  Object.entries(EXERCISES).forEach(([muscle, exList])=>{
+    exList.forEach(ex=>{
+      if(ex.toLowerCase().includes(q)) matches.push({ex, muscle});
+    });
+  });
+
+  results.style.display = 'block';
+  if(!matches.length){
+    results.innerHTML = `<div class="ex-search-empty">No exercises found for "${q}"</div>`;
+    return;
+  }
+
+  results.innerHTML = matches.slice(0,8).map(({ex, muscle})=>{
+    const cfg = getMuscleConfig(muscle);
+    // highlight matching portion
+    const idx = ex.toLowerCase().indexOf(q);
+    const highlighted = ex.slice(0,idx) + '<mark>' + ex.slice(idx, idx+q.length) + '</mark>' + ex.slice(idx+q.length);
+    return `<div class="ex-search-item" onclick="jumpToExercise('${muscle}','${ex.replace(/'/g,"\\'")}')">
+      <span class="ex-search-item-emoji">${cfg.emoji}</span>
+      <div class="ex-search-item-info">
+        <div class="ex-search-item-name">${highlighted}</div>
+        <div class="ex-search-item-muscle">${muscle}</div>
+      </div>
+      <span class="ex-search-item-arr">→</span>
+    </div>`;
+  }).join('');
+}
+
+function clearExSearch(){
+  document.getElementById('exSearchInput').value = '';
+  document.getElementById('exSearchResults').style.display = 'none';
+  document.getElementById('exSearchClear').style.display = 'none';
+}
+
+function jumpToExercise(muscle, exercise){
+  clearExSearch();
+  // activate the right muscle chip
+  const chips = document.querySelectorAll('.muscle-chip');
+  chips.forEach(c=>{ if(c.querySelector('span:last-child')?.textContent.trim()===muscle) selectMuscle(muscle, c); });
+  // scroll to and open the matching exercise card after render
+  setTimeout(()=>{
+    const cards = document.querySelectorAll('.exercise-card');
+    cards.forEach(card=>{
+      if(card.querySelector('.exercise-name')?.textContent === exercise){
+        card.classList.add('open');
+        card.scrollIntoView({behavior:'smooth', block:'center'});
+      }
+    });
+  }, 60);
+}
+
+// Close search results when clicking outside
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.ex-search-wrap')) {
+    const results = document.getElementById('exSearchResults');
+    if(results) results.style.display='none';
+  }
+});
+
+
+function selectMuscle(muscle, chip){
+  document.querySelectorAll('.muscle-chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  document.getElementById('musclePrompt').style.display='none';
+  document.getElementById('exerciseSection').style.display='block';
+  const cfg=getMuscleConfig(muscle);
+  document.getElementById('exerciseLabel').textContent=`${cfg.emoji}  ${muscle} Exercises`;
+  renderExerciseList(muscle);
+}
+
+function renderExerciseList(muscle){
+  const list=document.getElementById('exerciseList'), cfg=getMuscleConfig(muscle);
+  list.innerHTML='';
+  (EXERCISES[muscle]||[]).forEach(ex=>{
+    const card=document.createElement('div'); card.className='exercise-card';
+    const effortHTML = EFFORT_OPTIONS.map(e=>`
+      <button class="effort-btn" data-effort="${e.key}" onclick="selectEffort(this)">
+        <span class="eff-emoji">${e.emoji}</span>${e.label.replace('\n','<br>')}
+      </button>`).join('');
+    card.innerHTML=`
+      <div class="exercise-card-header" onclick="toggleCard(this.parentElement)">
+        <div class="exercise-icon" style="background:${cfg.bg}">${cfg.emoji}</div>
+        <div class="exercise-text"><div class="exercise-name">${ex}</div><div class="exercise-muscle-tag">${muscle}</div></div>
+        <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="exercise-form">
+        <div class="form-divider"></div>
+        <div class="form-grid">
+          <div class="field-group"><label class="field-label">Sets</label><div class="stepper"><button class="stepper-btn" onclick="stepValue(this,-1)">−</button><input class="field-input stepper-input" type="number" min="1" value="3" data-field="sets"/><button class="stepper-btn" onclick="stepValue(this,1)">+</button></div></div>
+          <div class="field-group"><label class="field-label">Reps</label><div class="stepper"><button class="stepper-btn" onclick="stepValue(this,-1)">−</button><input class="field-input stepper-input" type="number" min="1" value="8" data-field="reps"/><button class="stepper-btn" onclick="stepValue(this,1)">+</button></div></div>
+          <div class="field-group"><label class="field-label">Weight</label><input class="field-input" type="tel" inputmode="decimal" placeholder="lbs" data-field="weight"/></div>
+        </div>
+        <div class="field-group" style="margin-bottom:12px">
+          <label class="field-label">How did it go?</label>
+          <div class="effort-row">${effortHTML}</div>
+        </div>
+        <div class="field-group"><label class="field-label">Notes</label><textarea class="notes-input" placeholder="Optional notes…" data-field="notes"></textarea></div>
+        <button class="log-btn" onclick="logExercise('${ex}','${muscle}',this)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Save Set
+        </button>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function selectEffort(btn){
+  const row = btn.closest('.effort-row');
+  row.querySelectorAll('.effort-btn').forEach(b=>{
+    b.classList.remove('selected-struggled','selected-ease','selected-failed');
+  });
+  const effortMap = {struggled:'selected-struggled',ease:'selected-ease',failed:'selected-failed'};
+  btn.classList.add(effortMap[btn.dataset.effort]||'');
+}
+
+function toggleCard(card){
+  const was=card.classList.contains('open');
+  document.querySelectorAll('.exercise-card.open').forEach(c=>c.classList.remove('open'));
+  if(!was) card.classList.add('open');
+}
+
+function logExercise(exercise,muscle,btn){
+  const form=btn.closest('.exercise-form');
+  const sets=form.querySelector('[data-field="sets"]').value;
+  const reps=form.querySelector('[data-field="reps"]').value;
+  const weight=form.querySelector('[data-field="weight"]').value;
+  const notes=form.querySelector('[data-field="notes"]').value;
+  const effortBtn=form.querySelector('.effort-btn.selected-struggled,.effort-btn.selected-ease,.effort-btn.selected-failed');
+  const effort=effortBtn?effortBtn.dataset.effort:'';
+  const date=document.getElementById('logDate').value;
+  if(!sets||!reps){showToast('Please enter sets and reps');return;}
+  logs.unshift({id:Date.now(),date,muscle,exercise,sets,reps,weight:weight||'—',effort,notes});
+  saveLogs();
+  form.querySelectorAll('input[data-field="sets"]').forEach(i=>i.value='3');
+  form.querySelectorAll('input[data-field="reps"]').forEach(i=>i.value='8');
+  form.querySelectorAll('input[data-field="weight"],textarea').forEach(i=>i.value='');
+  form.querySelectorAll('.effort-btn').forEach(b=>b.classList.remove('selected-struggled','selected-ease','selected-failed'));
+  btn.closest('.exercise-card').classList.remove('open');
+  showToast('✓ Set logged!');
+  renderExportStats();
+  populateFilterOptions();
+  checkPlateaus();
+}
+
+// ─── HISTORY ─────────────────────────────────────────────────
+function isWithin3Days(dateStr){
+  const d=new Date(dateStr+'T12:00:00'), cutoff=new Date();
+  cutoff.setDate(cutoff.getDate()-3); cutoff.setHours(0,0,0,0);
+  return d>=cutoff;
+}
+
+function populateFilterOptions(){
+  const sel=document.getElementById('filterExercise'), cur=sel.value;
+  const names=[...new Set(logs.map(l=>l.exercise))].sort();
+  sel.innerHTML='<option value="">All Exercises</option>';
+  names.forEach(n=>{
+    const opt=document.createElement('option'); opt.value=n; opt.textContent=n;
+    if(n===cur) opt.selected=true; sel.appendChild(opt);
+  });
+}
+
+function toggleWeightSort(){
+  weightSortActive=!weightSortActive;
+  document.getElementById('weightSortBtn').classList.toggle('active',weightSortActive);
+  renderHistory();
+}
+
+function setDateMode(btn, mode){
+  dateFilterMode = mode;
+  document.querySelectorAll('.date-mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const inputs = document.getElementById('dateFilterInputs');
+  const single  = document.getElementById('dateRowSingle');
+  const range   = document.getElementById('dateRowRange');
+  if(!mode){
+    inputs.style.display='none';
+  } else if(mode==='range'){
+    inputs.style.display='block';
+    single.style.display='none';
+    range.style.display='flex';
+  } else {
+    inputs.style.display='block';
+    single.style.display='flex';
+    range.style.display='none';
+  }
+  renderHistory();
+}
+
+const EFFORT_DISPLAY = {
+  struggled:{label:'Passed & Struggled',cls:'struggled',emoji:'😤'},
+  ease:     {label:'Passed with Ease',  cls:'ease',     emoji:'😎'},
+  failed:   {label:'Failed',            cls:'failed',   emoji:'❌'},
+};
+
+function renderHistory(){
+  const container=document.getElementById('historyContent');
+  if(!logs.length){container.innerHTML=`<div class="history-empty"><span class="empty-icon">🏋️</span><p>No sets logged yet.<br>Head to Log to get started!</p></div>`;return;}
+  const filterEx=document.getElementById('filterExercise').value;
+  let filtered=logs.filter(l=>!filterEx||l.exercise===filterEx);
+
+  // Date filtering
+  const dateA = document.getElementById('dateFilterA')?.value;
+  const dateFrom = document.getElementById('dateFilterFrom')?.value;
+  const dateTo   = document.getElementById('dateFilterTo')?.value;
+  if(dateFilterMode==='on' && dateA){
+    filtered = filtered.filter(l=>l.date===dateA);
+  } else if(dateFilterMode==='before' && dateA){
+    filtered = filtered.filter(l=>l.date<dateA);
+  } else if(dateFilterMode==='after' && dateA){
+    filtered = filtered.filter(l=>l.date>dateA);
+  } else if(dateFilterMode==='range'){
+    if(dateFrom) filtered = filtered.filter(l=>l.date>=dateFrom);
+    if(dateTo)   filtered = filtered.filter(l=>l.date<=dateTo);
+  }
+
+  filtered=[...filtered].sort((a,b)=>a.date!==b.date?a.date.localeCompare(b.date):a.id-b.id);
+  if(weightSortActive){
+    const pw=e=>parseFloat(e.weight)||0, g={};
+    filtered.forEach(l=>{if(!g[l.date])g[l.date]=[];g[l.date].push(l);});
+    filtered=[];
+    Object.keys(g).sort((a,b)=>a.localeCompare(b)).forEach(d=>filtered.push(...g[d].sort((a,b)=>pw(b)-pw(a))));
+  }
+  if(!filtered.length){container.innerHTML=`<div class="history-empty"><span class="empty-icon">🔍</span><p>No entries match your filter.</p></div>`;return;}
+  container.innerHTML='';
+  const grouped={};
+  filtered.forEach(l=>{if(!grouped[l.date])grouped[l.date]=[];grouped[l.date].push(l);});
+  Object.keys(grouped).sort((a,b)=>a.localeCompare(b)).forEach(date=>{
+    const lbl=document.createElement('div'); lbl.className='date-group-label';
+    lbl.textContent=formatDate(date); container.appendChild(lbl);
+    grouped[date].forEach(entry=>{
+      const cfg=getMuscleConfig(entry.muscle);
+      const canEdit=isWithin3Days(entry.date);
+      const effortD = entry.effort&&EFFORT_DISPLAY[entry.effort]?EFFORT_DISPLAY[entry.effort]:null;
+      const el=document.createElement('div');
+      el.className=`history-entry${canEdit?' editable':''}`;
+      el.dataset.id=entry.id;
+      el.innerHTML=`
+        <div class="history-top">
+          <div class="history-ex-icon" style="background:${cfg.bg}">${cfg.emoji}</div>
+          <div class="history-ex-info">
+            <div class="history-name">${entry.exercise}</div>
+            <span class="history-muscle-badge" style="background:${cfg.bg};color:${cfg.color}">${entry.muscle}</span>
+          </div>
+          <div class="history-right">
+            <div class="history-date-label">${entry.date.slice(5).replace('-','/')}</div>
+            ${canEdit?`<div class="history-actions">
+              <button class="action-btn edit-btn" onclick="openEditForm(${entry.id})">✏️</button>
+              <button class="action-btn del-btn" onclick="askDelete(${entry.id},'${entry.exercise.replace(/'/g,"\\'")}')">🗑️</button>
+            </div>`:''}
+          </div>
+        </div>
+        <div class="history-stats-row">
+          <div class="stat-badge">🔁 <strong>${entry.sets}</strong> sets</div>
+          <div class="stat-badge">⚡ <strong>${entry.reps}</strong> reps</div>
+          <div class="stat-badge">⚖️ <strong>${entry.weight}</strong> lbs</div>
+          ${effortD?`<span class="effort-badge ${effortD.cls}">${effortD.emoji} ${effortD.label}</span>`:''}
+        </div>
+        ${entry.notes?`<div class="history-notes-text">${entry.notes}</div>`:''}
+        ${canEdit?`
+        <div class="edit-form" id="edit-${entry.id}">
+          <div class="form-grid" style="margin-bottom:10px">
+            <div class="field-group"><label class="field-label">Sets</label><div class="stepper"><button class="stepper-btn" onclick="stepValue(this,-1)">−</button><input class="field-input stepper-input" type="number" min="1" value="${entry.sets}" data-edit="sets"/><button class="stepper-btn" onclick="stepValue(this,1)">+</button></div></div>
+            <div class="field-group"><label class="field-label">Reps</label><div class="stepper"><button class="stepper-btn" onclick="stepValue(this,-1)">−</button><input class="field-input stepper-input" type="number" min="1" value="${entry.reps}" data-edit="reps"/><button class="stepper-btn" onclick="stepValue(this,1)">+</button></div></div>
+            <div class="field-group"><label class="field-label">Weight</label><input class="field-input" type="tel" inputmode="decimal" value="${entry.weight==='—'?'':entry.weight}" placeholder="lbs" data-edit="weight"/></div>
+          </div>
+          <div class="field-group" style="margin-bottom:10px">
+            <label class="field-label">How did it go?</label>
+            <div class="effort-row">
+              ${EFFORT_OPTIONS.map(e=>`<button class="effort-btn ${entry.effort===e.key?(e.cls||''):''}" data-effort="${e.key}" onclick="selectEffort(this)"><span class="eff-emoji">${e.emoji}</span>${e.label.replace('\n','<br>')}</button>`).join('')}
+            </div>
+          </div>
+          <div class="field-group"><label class="field-label">Notes</label><textarea class="notes-input" data-edit="notes" style="min-height:44px">${entry.notes||''}</textarea></div>
+          <div class="edit-actions">
+            <button class="edit-cancel-btn" onclick="closeEditForm(${entry.id})">Cancel</button>
+            <button class="edit-save-btn" onclick="saveEdit(${entry.id})">Save Changes</button>
+          </div>
+        </div>`:''}`;
+      container.appendChild(el);
+    });
+  });
+}
+
+function openEditForm(id){
+  document.querySelectorAll('.edit-form.open').forEach(f=>f.classList.remove('open'));
+  document.getElementById(`edit-${id}`)?.classList.add('open');
+}
+function closeEditForm(id){document.getElementById(`edit-${id}`)?.classList.remove('open');}
+function saveEdit(id){
+  const form=document.getElementById(`edit-${id}`);
+  const sets=form.querySelector('[data-edit="sets"]').value;
+  const reps=form.querySelector('[data-edit="reps"]').value;
+  const weight=form.querySelector('[data-edit="weight"]').value;
+  const notes=form.querySelector('[data-edit="notes"]').value;
+  const effortBtn=form.querySelector('.effort-btn.selected-struggled,.effort-btn.selected-ease,.effort-btn.selected-failed');
+  const effort=effortBtn?effortBtn.dataset.effort:'';
+  const idx=logs.findIndex(l=>l.id===id); if(idx===-1)return;
+  logs[idx]={...logs[idx],sets,reps,weight:weight||'—',effort,notes};
+  saveLogs(); renderHistory(); populateFilterOptions(); showToast('✓ Entry updated');
+}
+
+// ─── EXERCISES MANAGEMENT ─────────────────────────────────────
+let exGroupOpen = {}; // track which groups are expanded
+
+function renderExercisesTab(){
+  const container = document.getElementById('exMgmtContent');
+  container.innerHTML = '';
+  Object.keys(EXERCISES).forEach(muscle=>{
+    const cfg = getMuscleConfig(muscle);
+    const items = EXERCISES[muscle];
+    const isOpen = exGroupOpen[muscle] !== false; // default open
+
+    const group = document.createElement('div');
+    group.className = `ex-mgmt-group${isOpen?' open':''}`;
+    group.id = `exgroup-${muscle}`;
+
+    const itemsHTML = items.map((ex,i)=>`
+      <div class="ex-mgmt-item" id="exitem-${muscle}-${i}">
+        <span class="ex-mgmt-name">${ex}</span>
+        <input class="ex-mgmt-edit-input" value="${ex}" maxlength="50"/>
+        <div class="ex-mgmt-actions">
+          <button class="ex-mgmt-btn edit-btn" onclick="startEditEx('${muscle}',${i})">✏️</button>
+          <button class="ex-mgmt-btn save" style="display:none" onclick="saveEditEx('${muscle}',${i})">✓</button>
+          <button class="ex-mgmt-btn cancel" style="display:none" onclick="cancelEditEx('${muscle}',${i})">✕</button>
+          <button class="ex-mgmt-btn del-btn" onclick="askDeleteExercise('${muscle}',${i},'${ex.replace(/'/g,"\\'")}')">🗑️</button>
+        </div>
+      </div>`).join('');
+
+    group.innerHTML = `
+      <div class="ex-mgmt-group-header" onclick="toggleExGroup('${muscle}')">
+        <span class="ex-mgmt-group-emoji">${cfg.emoji}</span>
+        <span class="ex-mgmt-group-name">${muscle}</span>
+        <span class="ex-mgmt-group-count">${items.length}</span>
+        <button class="ex-mgmt-group-del" onclick="event.stopPropagation();askDeleteMuscle('${muscle}')" title="Remove group">🗑️</button>
+        <svg class="ex-mgmt-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="ex-mgmt-body">
+        ${itemsHTML}
+        <div class="ex-inline-add">
+          <input class="ex-inline-add-input" id="newex-${muscle}" placeholder="Add exercise to ${muscle}…" maxlength="50"/>
+          <button class="ex-inline-add-btn" onclick="addExercise('${muscle}')">+ Add</button>
+        </div>
+      </div>`;
+    container.appendChild(group);
+  });
+}
+
+function toggleExGroup(muscle){
+  const group = document.getElementById(`exgroup-${muscle}`);
+  const isOpen = group.classList.toggle('open');
+  exGroupOpen[muscle] = isOpen;
+}
+
+// Global "Add Exercise" bottom sheet
+function openAddExSheet(){
+  const sel = document.getElementById('globalExMuscle');
+  sel.innerHTML = '<option value="">Choose muscle group…</option>';
+  Object.keys(EXERCISES).forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; sel.appendChild(o); });
+  document.getElementById('globalExName').value = '';
+  document.getElementById('addExSheet').classList.add('open');
+  setTimeout(()=>document.getElementById('globalExName').focus(), 100);
+}
+function closeAddExSheet(){ document.getElementById('addExSheet').classList.remove('open'); }
+function addExerciseGlobal(){
+  const name = document.getElementById('globalExName').value.trim();
+  const muscle = document.getElementById('globalExMuscle').value;
+  if(!name){ showToast('Enter an exercise name'); return; }
+  if(!muscle){ showToast('Choose a muscle group'); return; }
+  if(EXERCISES[muscle].includes(name)){ showToast('Already exists'); return; }
+  EXERCISES[muscle].push(name);
+  exGroupOpen[muscle] = true; // expand the group it was added to
+  saveExercises(); renderExercisesTab(); buildMuscleChips();
+  closeAddExSheet();
+  showToast(`✓ Added "${name}" to ${muscle}`);
+}
+
+
+
+function startEditEx(muscle, i){
+  const row=document.getElementById(`exitem-${muscle}-${i}`);
+  row.querySelector('.ex-mgmt-name').classList.add('editing');
+  row.querySelector('.ex-mgmt-edit-input').classList.add('editing');
+  row.querySelector('.edit-btn').style.display='none';
+  row.querySelector('.save').style.display='flex';
+  row.querySelector('.cancel').style.display='flex';
+  row.querySelector('.del-btn').style.display='none';
+  row.querySelector('.ex-mgmt-edit-input').focus();
+}
+function cancelEditEx(muscle, i){
+  const row=document.getElementById(`exitem-${muscle}-${i}`);
+  row.querySelector('.ex-mgmt-name').classList.remove('editing');
+  row.querySelector('.ex-mgmt-edit-input').classList.remove('editing');
+  row.querySelector('.ex-mgmt-edit-input').value=EXERCISES[muscle][i];
+  row.querySelector('.edit-btn').style.display='flex';
+  row.querySelector('.save').style.display='none';
+  row.querySelector('.cancel').style.display='none';
+  row.querySelector('.del-btn').style.display='flex';
+}
+function saveEditEx(muscle, i){
+  const row=document.getElementById(`exitem-${muscle}-${i}`);
+  const newName=row.querySelector('.ex-mgmt-edit-input').value.trim();
+  if(!newName){showToast('Name cannot be empty');return;}
+  EXERCISES[muscle][i]=newName;
+  saveExercises(); renderExercisesTab(); buildMuscleChips();
+  showToast('✓ Exercise updated');
+}
+
+function addExercise(muscle){
+  const input=document.getElementById(`newex-${muscle}`);
+  const name=input.value.trim();
+  if(!name){showToast('Enter an exercise name');return;}
+  if(EXERCISES[muscle].includes(name)){showToast('Already exists');return;}
+  EXERCISES[muscle].push(name);
+  saveExercises(); renderExercisesTab(); buildMuscleChips(); input.value='';
+  showToast(`✓ Added to ${muscle}`);
+}
+
+function addMuscleGroup(){
+  const input=document.getElementById('newMuscleInput');
+  const name=input.value.trim();
+  if(!name){showToast('Enter a muscle group name');return;}
+  if(EXERCISES[name]){showToast('Already exists');return;}
+  EXERCISES[name]=[]; 
+  MUSCLE_CONFIG[name]={emoji:'💪',color:'#64687a',bg:'#f0f2f6'};
+  saveExercises(); renderExercisesTab(); buildMuscleChips(); input.value='';
+  showToast(`✓ Added "${name}"`);
+}
+
+function askDeleteExercise(muscle, i, name){
+  pendingDeleteType='exercise'; pendingDeleteMeta={muscle,i,name};
+  document.getElementById('confirmTitle').textContent='Remove exercise?';
+  document.getElementById('confirmSub').textContent=`"${name}" will be removed from ${muscle}.`;
+  document.getElementById('confirmDelBtn').textContent='Remove';
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+
+function askDeleteMuscle(muscle){
+  pendingDeleteType='muscle'; pendingDeleteMeta={muscle};
+  document.getElementById('confirmTitle').textContent='Remove muscle group?';
+  document.getElementById('confirmSub').textContent=`"${muscle}" and all ${EXERCISES[muscle].length} exercises will be removed.`;
+  document.getElementById('confirmDelBtn').textContent='Remove';
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+
+// ─── DELETE ───────────────────────────────────────────────────
+function askDelete(id, name){
+  pendingDeleteId=id; pendingDeleteType='log';
+  document.getElementById('confirmTitle').textContent='Delete this set?';
+  document.getElementById('confirmSub').textContent=`"${name}" will be permanently removed.`;
+  document.getElementById('confirmDelBtn').textContent='Delete';
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm(){
+  document.getElementById('confirmOverlay').classList.remove('open');
+  pendingDeleteId=null; pendingDeleteMeta=null;
+}
+function confirmDelete(){
+  if(pendingDeleteType==='log'){
+    logs=logs.filter(l=>l.id!==pendingDeleteId);
+    saveLogs(); renderHistory(); populateFilterOptions(); renderExportStats();
+    showToast('🗑️ Entry deleted');
+  } else if(pendingDeleteType==='exercise'){
+    const {muscle,i}=pendingDeleteMeta;
+    EXERCISES[muscle].splice(i,1);
+    saveExercises(); renderExercisesTab(); buildMuscleChips();
+    showToast('🗑️ Exercise removed');
+  } else if(pendingDeleteType==='muscle'){
+    const {muscle}=pendingDeleteMeta;
+    delete EXERCISES[muscle];
+    saveExercises(); renderExercisesTab(); buildMuscleChips();
+    showToast(`🗑️ "${muscle}" removed`);
+  }
+  closeConfirm();
+}
+
+// ─── EXPORT ───────────────────────────────────────────────────
+function renderExportStats(){
+  const muscles=new Set(logs.map(l=>l.muscle)), sessions=new Set(logs.map(l=>l.date));
+  document.getElementById('exportStats').innerHTML=`
+    <div class="stat-card"><span class="stat-card-icon">📦</span><span class="stat-card-num">${logs.length}</span><span class="stat-card-label">Total Sets</span></div>
+    <div class="stat-card"><span class="stat-card-icon">💪</span><span class="stat-card-num">${muscles.size}</span><span class="stat-card-label">Muscles</span></div>
+    <div class="stat-card"><span class="stat-card-icon">📅</span><span class="stat-card-num">${sessions.size}</span><span class="stat-card-label">Sessions</span></div>`;
+}
+function getCSVData(){
+  const h=['Date','Muscle Group','Exercise','Sets','Reps','Weight (lbs)','Effort','Notes'];
+  const rows=logs.map(l=>[l.date,l.muscle,l.exercise,l.sets,l.reps,l.weight,l.effort||'',`"${(l.notes||'').replace(/"/g,'""')}"`]);
+  return [h,...rows].map(r=>r.join(',')).join('\n');
+}
+function exportCSV(){
+  if(!logs.length){showToast('No data to export');return;}
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([getCSVData()],{type:'text/csv'})),download:`born2lift_${today()}.csv`});
+  a.click(); showToast('📄 CSV downloaded');
+}
+function exportExcel(){
+  if(!logs.length){showToast('No data to export');return;}
+  const h=['Date','Muscle Group','Exercise','Sets','Reps','Weight (lbs)','Effort','Notes'];
+  const rows=logs.map(l=>[l.date,l.muscle,l.exercise,l.sets,l.reps,l.weight,l.effort||'',l.notes||'']);
+  let xml=`<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Born2Lift"><Table>`;
+  const toRow=cells=>`<Row>${cells.map(c=>`<Cell><Data ss:Type="String">${String(c).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</Data></Cell>`).join('')}</Row>`;
+  xml+=toRow(h); rows.forEach(r=>xml+=toRow(r));
+  xml+=`</Table></Worksheet></Workbook>`;
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([xml],{type:'application/vnd.ms-excel'})),download:`born2lift_${today()}.xls`});
+  a.click(); showToast('📊 Excel downloaded');
+}
+
+
+function exportBackup(){
+  const backup = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    logs,
+    exercises: EXERCISES,
+    muscleConfig: MUSCLE_CONFIG
+  };
+  const json = JSON.stringify(backup, null, 2);
+  const a = Object.assign(document.createElement('a'),{
+    href: URL.createObjectURL(new Blob([json],{type:'application/json'})),
+    download: `born2lift_backup_${today()}.json`
+  });
+  a.click();
+  showToast('💾 Backup saved!');
+}
+
+function importBackup(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const backup = JSON.parse(e.target.result);
+      // Validate it's a Born2Lift backup
+      if(!backup.version || !backup.logs || !backup.exercises){
+        showToast('⚠️ Invalid backup file'); return;
+      }
+      // Restore everything
+      logs = backup.logs || [];
+      EXERCISES = backup.exercises || {};
+      MUSCLE_CONFIG = backup.muscleConfig || {};
+      saveLogs();
+      saveExercises();
+      // Refresh all views
+      buildMuscleChips();
+      renderExportStats();
+      populateFilterOptions();
+      showToast(`✓ Restored ${logs.length} sets!`);
+    } catch {
+      showToast('⚠️ Could not read backup file');
+    }
+    // Reset the input so the same file can be loaded again if needed
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function saveLogs(){localStorage.setItem('b2l_logs',JSON.stringify(logs));}
+function saveExercises(){
+  localStorage.setItem('b2l_exercises',JSON.stringify(EXERCISES));
+  localStorage.setItem('b2l_muscle_config',JSON.stringify(MUSCLE_CONFIG));
+}
+function switchView(name,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active'); btn.classList.add('active');
+  if(name==='history'){populateFilterOptions();renderHistory();}
+  if(name==='exercises') renderExercisesTab();
+  if(name==='export') renderExportStats();
+  if(name==='analyze') renderAnalyze();
+}
+function formatDate(dateStr){
+  const d=new Date(dateStr+'T12:00:00'), ts=new Date().toISOString().split('T')[0];
+  const yest=new Date(); yest.setDate(yest.getDate()-1);
+  if(dateStr===ts) return '📅 Today';
+  if(dateStr===yest.toISOString().split('T')[0]) return '🕐 Yesterday';
+  return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+}
+function today(){return new Date().toISOString().split('T')[0];}
+function showToast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2300);
+}
+function stepValue(btn,delta){
+  const input=btn.parentElement.querySelector('.stepper-input');
+  input.value=Math.max(1,(parseInt(input.value)||0)+delta);
+}
+
+// ─── ANALYZE ─────────────────────────────────────────────────
+let donutChart = null, weeklyChart = null, lineChart = null;
+
+function renderAnalyze(){
+  if(!logs.length){
+    document.getElementById('az-empty').style.display='block';
+    document.getElementById('az-content').style.display='none';
+    return;
+  }
+  document.getElementById('az-empty').style.display='none';
+  document.getElementById('az-content').style.display='block';
+  renderAzStats();
+  renderStreakCard();
+  renderMuscleDonut();
+  renderWeeklyBar();
+  populateAzExSelect();
+  fetchOverallFeedback();
+  document.getElementById('azDrillContent').innerHTML='';
+}
+
+// ── Quick Stats ──────────────────────────────────────────────
+function renderAzStats(){
+  const sessions = [...new Set(logs.map(l=>l.date))].sort();
+  const totalSets = logs.length;
+  const totalSessions = sessions.length;
+
+  // Most trained muscle
+  const muscleCounts = {};
+  logs.forEach(l=>muscleCounts[l.muscle]=(muscleCounts[l.muscle]||0)+1);
+  const topMuscle = Object.entries(muscleCounts).sort((a,b)=>b[1]-a[1])[0];
+
+  // Avg sets per session
+  const avgSets = totalSets > 0 ? (totalSets/totalSessions).toFixed(1) : 0;
+
+  // Weight PRs count
+  const prMap = {};
+  [...logs].reverse().forEach(l=>{
+    const w = parseFloat(l.weight); if(isNaN(w)||w===0) return;
+    if(!prMap[l.exercise]||w>prMap[l.exercise]) prMap[l.exercise]=w;
+  });
+  const prCount = Object.keys(prMap).length;
+
+  // This week vs last week sets
+  const getWeekOf = d => { const dt=new Date(d+'T12:00:00'); const day=dt.getDay()||7; dt.setDate(dt.getDate()+4-day); const y=dt.getFullYear(); const w=Math.ceil(((dt-new Date(y,0,1))/86400000+1)/7); return `${y}-W${String(w).padStart(2,'0')}`; };
+  const thisWk = getWeekOf(new Date().toISOString().split('T')[0]);
+  const lastWk = getWeekOf(new Date(Date.now()-7*86400000).toISOString().split('T')[0]);
+  const thisWkSets = logs.filter(l=>getWeekOf(l.date)===thisWk).length;
+  const lastWkSets = logs.filter(l=>getWeekOf(l.date)===lastWk).length;
+  const wkDiff = lastWkSets > 0 ? Math.round(((thisWkSets-lastWkSets)/lastWkSets)*100) : null;
+  const wkTrend = wkDiff===null?'flat':wkDiff>0?'up':wkDiff<0?'down':'flat';
+  const wkTrendText = wkDiff===null?'No prior week':wkDiff===0?'Same as last week':wkDiff>0?`▲ ${wkDiff}% vs last week`:`▼ ${Math.abs(wkDiff)}% vs last week`;
+
+  const cfg = topMuscle ? getMuscleConfig(topMuscle[0]) : {emoji:'💪'};
+
+  document.getElementById('azStatsGrid').innerHTML = `
+    <div class="az-stat">
+      <div class="az-stat-glow" style="background:var(--green)"></div>
+      <span class="az-stat-icon">🏋️</span>
+      <div class="az-stat-num">${totalSets}</div>
+      <div class="az-stat-label">Total Sets</div>
+      <div class="az-stat-sub">${totalSessions} sessions</div>
+    </div>
+    <div class="az-stat">
+      <div class="az-stat-glow" style="background:var(--blue)"></div>
+      <span class="az-stat-icon">📈</span>
+      <div class="az-stat-num">${avgSets}</div>
+      <div class="az-stat-label">Avg Sets/Session</div>
+      <div class="az-stat-trend ${wkTrend}">${wkTrendText}</div>
+    </div>
+    <div class="az-stat">
+      <div class="az-stat-glow" style="background:var(--amber)"></div>
+      <span class="az-stat-icon">🏆</span>
+      <div class="az-stat-num">${prCount}</div>
+      <div class="az-stat-label">Exercises Tracked</div>
+      <div class="az-stat-sub">with weight PRs</div>
+    </div>
+    <div class="az-stat">
+      <div class="az-stat-glow" style="background:var(--purple)"></div>
+      <span class="az-stat-icon">${cfg.emoji}</span>
+      <div class="az-stat-num" style="font-size:16px;margin-top:2px">${topMuscle?topMuscle[0]:'—'}</div>
+      <div class="az-stat-label">Top Muscle</div>
+      <div class="az-stat-sub">${topMuscle?topMuscle[1]+' sets':''}</div>
+    </div>`;
+}
+
+// ── Streak ───────────────────────────────────────────────────
+function renderStreakCard(){
+  const sessions = [...new Set(logs.map(l=>l.date))].sort().reverse();
+  let streak = 0, best = 0, cur = 0;
+  const today_d = new Date(); today_d.setHours(0,0,0,0);
+  // count consecutive days ending today or yesterday
+  let check = new Date(today_d);
+  const dateSet = new Set(logs.map(l=>l.date));
+  // current streak
+  while(true){
+    const ds = check.toISOString().split('T')[0];
+    if(dateSet.has(ds)){ streak++; check.setDate(check.getDate()-1); }
+    else if(streak===0){ check.setDate(check.getDate()-1); if(today_d-check>2*86400000) break; }
+    else break;
+  }
+  // best streak
+  let sorted = [...dateSet].sort();
+  cur = 1; best = 1;
+  for(let i=1;i<sorted.length;i++){
+    const prev = new Date(sorted[i-1]+'T12:00:00'), curr = new Date(sorted[i]+'T12:00:00');
+    const diff = (curr-prev)/86400000;
+    if(diff===1){ cur++; if(cur>best) best=cur; } else cur=1;
+  }
+  const card = document.getElementById('azStreakCard');
+  if(streak===0){ card.innerHTML=''; return; }
+  card.innerHTML=`
+    <div class="az-streak-card">
+      <div class="az-streak-flame">🔥</div>
+      <div class="az-streak-info">
+        <div class="az-streak-num">${streak}</div>
+        <div class="az-streak-lbl">Day Streak</div>
+        <div class="az-streak-sub">Best streak: ${best} days</div>
+      </div>
+    </div>`;
+}
+
+// ── Muscle Donut ─────────────────────────────────────────────
+const DONUT_COLORS = ['#22c55e','#3b82f6','#8b5cf6','#f59e0b','#ef4444','#06b6d4','#ec4899','#f97316','#84cc16','#a78bfa'];
+function renderMuscleDonut(){
+  const counts = {};
+  logs.forEach(l=>counts[l.muscle]=(counts[l.muscle]||0)+1);
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const labels = sorted.map(e=>e[0]), data = sorted.map(e=>e[1]);
+  const colors = labels.map((_,i)=>DONUT_COLORS[i%DONUT_COLORS.length]);
+  const total = data.reduce((a,b)=>a+b,0);
+
+  if(donutChart){ donutChart.destroy(); donutChart=null; }
+  const ctx = document.getElementById('muscleDonut').getContext('2d');
+  donutChart = new Chart(ctx,{
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:4}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw} sets (${Math.round(ctx.raw/total*100)}%)`}}}}
+  });
+
+  const legend = document.getElementById('muscleLegend');
+  legend.innerHTML = sorted.slice(0,6).map((e,i)=>`
+    <div class="az-legend-item">
+      <div class="az-legend-dot" style="background:${colors[i]}"></div>
+      <span>${e[0]}</span>
+      <span class="az-legend-val">${Math.round(e[1]/total*100)}%</span>
+    </div>`).join('');
+}
+
+// ── Weekly Bar ───────────────────────────────────────────────
+function renderWeeklyBar(){
+  const getWeekLabel = d => {
+    const dt = new Date(d+'T12:00:00');
+    const day = dt.getDay()||7; dt.setDate(dt.getDate()+4-day);
+    const y = dt.getFullYear(); const w = Math.ceil(((dt-new Date(y,0,1))/86400000+1)/7);
+    return `W${String(w).padStart(2,'0')}`;
+  };
+  const weekCounts = {};
+  logs.forEach(l=>{ const wk=getWeekLabel(l.date); weekCounts[wk]=(weekCounts[wk]||0)+1; });
+  const sorted = Object.entries(weekCounts).sort((a,b)=>a[0].localeCompare(b[0])).slice(-10);
+  const labels = sorted.map(e=>e[0]), data = sorted.map(e=>e[1]);
+
+  if(weeklyChart){ weeklyChart.destroy(); weeklyChart=null; }
+  const ctx = document.getElementById('weeklyBar').getContext('2d');
+  weeklyChart = new Chart(ctx,{
+    type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:'rgba(34,197,94,.7)',borderRadius:6,borderSkipped:false}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw} sets`}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10},color:'#9ea3b5'}},
+        y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},color:'#9ea3b5',stepSize:1},beginAtZero:true}
+      }
+    }
+  });
+}
+
+// ── Populate Exercise Select ─────────────────────────────────
+function populateAzExSelect(){
+  const sel = document.getElementById('azExSelect');
+  const cur = sel.value;
+  const names = [...new Set(logs.map(l=>l.exercise))].sort();
+  sel.innerHTML = '<option value="">Choose an exercise…</option>';
+  names.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; if(n===cur)o.selected=true; sel.appendChild(o); });
+}
+
+// ── Exercise Drill Down ──────────────────────────────────────
+function renderDrillDown(){
+  const ex = document.getElementById('azExSelect').value;
+  const container = document.getElementById('azDrillContent');
+  if(!ex){ container.innerHTML=''; return; }
+
+  const exLogs = logs.filter(l=>l.exercise===ex).sort((a,b)=>a.date.localeCompare(b.date)||a.id-b.id);
+  if(!exLogs.length){ container.innerHTML=''; return; }
+
+  const muscle = exLogs[0].muscle;
+  const cfg = getMuscleConfig(muscle);
+
+  // PR
+  const withWeight = exLogs.filter(l=>parseFloat(l.weight)>0);
+  const pr = withWeight.length ? withWeight.reduce((best,l)=>parseFloat(l.weight)>parseFloat(best.weight)?l:best) : null;
+
+  // Effort breakdown
+  const effortCounts = {struggled:0,ease:0,failed:0};
+  exLogs.forEach(l=>{ if(l.effort&&effortCounts[l.effort]!==undefined) effortCounts[l.effort]++; });
+  const effortTotal = Object.values(effortCounts).reduce((a,b)=>a+b,0);
+
+  // First / last date
+  const firstDate = exLogs[0].date, lastDate = exLogs[exLogs.length-1].date;
+
+  // Weight progression data (one point per date — max weight that day)
+  const dayMax = {};
+  withWeight.forEach(l=>{ if(!dayMax[l.date]||parseFloat(l.weight)>dayMax[l.date]) dayMax[l.date]=parseFloat(l.weight); });
+  const progDates = Object.keys(dayMax).sort();
+  const progWeights = progDates.map(d=>dayMax[d]);
+
+  const effortHTML = effortTotal > 0 ? `
+    <div class="az-effort-row">
+      ${effortCounts.ease>0?`<span class="az-effort-pill ease">😎 Eased: ${effortCounts.ease}</span>`:''}
+      ${effortCounts.struggled>0?`<span class="az-effort-pill struggled">😤 Struggled: ${effortCounts.struggled}</span>`:''}
+      ${effortCounts.failed>0?`<span class="az-effort-pill failed">❌ Failed: ${effortCounts.failed}</span>`:''}
+    </div>` : '';
+
+  const prHTML = pr ? `
+    <div class="az-pr-banner">
+      <div class="az-pr-icon">🏆</div>
+      <div class="az-pr-body">
+        <div class="az-pr-label">Personal Record</div>
+        <div class="az-pr-val">${pr.weight} lbs × ${pr.reps} reps</div>
+        <div class="az-pr-date">${pr.date}</div>
+      </div>
+    </div>` : '';
+
+  const chartHTML = progDates.length >= 2 ? `
+    <div class="az-chart-title" style="margin-top:4px">Weight Progression</div>
+    <div class="az-line-wrap"><canvas id="drillLineChart"></canvas></div>` : '';
+
+  container.innerHTML = `
+    <div class="az-drill-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:36px;height:36px;border-radius:10px;background:${cfg.bg};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${cfg.emoji}</div>
+        <div>
+          <div style="font-family:var(--font-display);font-size:15px;font-weight:700">${ex}</div>
+          <div style="font-size:11px;color:var(--text-light)">${muscle} · ${firstDate} → ${lastDate}</div>
+        </div>
+      </div>
+      <div class="az-drill-stats">
+        <div class="az-drill-stat"><div class="az-drill-stat-num">${exLogs.length}</div><div class="az-drill-stat-lbl">Total Sets</div></div>
+        <div class="az-drill-stat"><div class="az-drill-stat-num">${[...new Set(exLogs.map(l=>l.date))].length}</div><div class="az-drill-stat-lbl">Sessions</div></div>
+        <div class="az-drill-stat"><div class="az-drill-stat-num">${pr?pr.weight+' lbs':'—'}</div><div class="az-drill-stat-lbl">Best Weight</div></div>
+      </div>
+      ${prHTML}
+      ${effortHTML}
+      ${chartHTML}
+    </div>
+    <div class="az-ai-card" id="azDrillAI" style="margin-bottom:8px">
+      <div class="az-ai-header">
+        <div class="az-ai-icon">🤖</div>
+        <div>
+          <div class="az-ai-label">AI Coach</div>
+          <div class="az-ai-title">${ex} Feedback</div>
+        </div>
+      </div>
+      <div class="az-ai-body" id="azDrillAIBody">
+        <div class="az-ai-loading"><div class="dot-pulse"><span></span><span></span><span></span></div><span>Analyzing ${ex}…</span></div>
+      </div>
+      <button class="az-ai-refresh" onclick="fetchDrillFeedback()">↻ Refresh feedback</button>
+    </div>`;
+
+  // Draw line chart if enough data
+  if(progDates.length >= 2){
+    setTimeout(()=>{
+      if(lineChart){ lineChart.destroy(); lineChart=null; }
+      const ctx = document.getElementById('drillLineChart')?.getContext('2d');
+      if(!ctx) return;
+      lineChart = new Chart(ctx,{
+        type:'line',
+        data:{
+          labels: progDates.map(d=>d.slice(5).replace('-','/')),
+          datasets:[{
+            data: progWeights,
+            borderColor:'#8b5cf6',
+            backgroundColor:'rgba(139,92,246,.1)',
+            fill:true,
+            tension:.35,
+            pointBackgroundColor:'#8b5cf6',
+            pointRadius:4,
+            pointHoverRadius:6,
+            borderWidth:2.5
+          }]
+        },
+        options:{
+          responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw} lbs`}}},
+          scales:{
+            x:{grid:{display:false},ticks:{font:{size:10},color:'#9ea3b5'}},
+            y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},color:'#9ea3b5'},beginAtZero:false}
+          }
+        }
+      });
+    },50);
+  }
+
+  fetchDrillFeedback();
+}
+
+// ── AI — Overall Feedback ────────────────────────────────────
+async function fetchOverallFeedback(){
+  const el = document.getElementById('azOverallAIBody');
+  el.innerHTML = `<div class="az-ai-loading"><div class="dot-pulse"><span></span><span></span><span></span></div><span>Analyzing your training…</span></div>`;
+
+  const sessions = [...new Set(logs.map(l=>l.date))].length;
+  const muscleCounts = {};
+  logs.forEach(l=>muscleCounts[l.muscle]=(muscleCounts[l.muscle]||0)+1);
+  const muscleBreakdown = Object.entries(muscleCounts).sort((a,b)=>b[1]-a[1]).map(e=>`${e[0]}: ${e[1]} sets`).join(', ');
+
+  const effortCounts = {ease:0,struggled:0,failed:0};
+  logs.forEach(l=>{ if(l.effort&&effortCounts[l.effort]!==undefined) effortCounts[l.effort]++; });
+
+  const prMap = {};
+  [...logs].reverse().forEach(l=>{ const w=parseFloat(l.weight); if(!isNaN(w)&&w>0&&(!prMap[l.exercise]||w>prMap[l.exercise])) prMap[l.exercise]=w; });
+
+  const getWeekOf = d => { const dt=new Date(d+'T12:00:00'); const day=dt.getDay()||7; dt.setDate(dt.getDate()+4-day); const y=dt.getFullYear(); const w=Math.ceil(((dt-new Date(y,0,1))/86400000+1)/7); return `${y}-W${String(w).padStart(2,'0')}`; };
+  const weekMap = {}; logs.forEach(l=>{ const wk=getWeekOf(l.date); weekMap[wk]=(weekMap[wk]||0)+1; });
+  const weeklyAvg = Object.values(weekMap).length ? (Object.values(weekMap).reduce((a,b)=>a+b,0)/Object.values(weekMap).length).toFixed(1) : 0;
+
+  const prompt = `You are an expert personal trainer analyzing someone's workout data. Be encouraging but honest, specific, and practical. Write 3–4 short focused paragraphs. No headers or bullet points — just clean flowing advice.
+
+Workout data:
+- Total sets logged: ${logs.length}
+- Total sessions: ${sessions}
+- Avg sets per week: ${weeklyAvg}
+- Muscle group breakdown: ${muscleBreakdown}
+- Effort ratings — Passed with Ease: ${effortCounts.ease}, Passed & Struggled: ${effortCounts.struggled}, Failed: ${effortCounts.failed}
+- Exercises tracked with weight: ${Object.keys(prMap).length}
+
+Give feedback on: overall training volume, muscle balance (any imbalances?), effort rating patterns, and 1–2 specific actionable tips to improve. Keep it concise and motivating.`;
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:prompt}]})});
+    const data = await res.json();
+    const text = (data.content?.[0]?.text||'').trim();
+    el.innerHTML = text.split('\n\n').filter(Boolean).map(p=>`<p>${p}</p>`).join('');
+  }catch{
+    el.innerHTML = `<p style="color:rgba(255,255,255,.4)">Could not load feedback. Tap refresh to try again.</p>`;
+  }
+}
+
+// ── AI — Drill Feedback ──────────────────────────────────────
+async function fetchDrillFeedback(){
+  const ex = document.getElementById('azExSelect').value;
+  const el = document.getElementById('azDrillAIBody');
+  if(!ex||!el) return;
+
+  el.innerHTML = `<div class="az-ai-loading"><div class="dot-pulse"><span></span><span></span><span></span></div><span>Analyzing ${ex}…</span></div>`;
+
+  const exLogs = logs.filter(l=>l.exercise===ex).sort((a,b)=>a.date.localeCompare(b.date));
+  const withWeight = exLogs.filter(l=>parseFloat(l.weight)>0);
+  const pr = withWeight.length ? Math.max(...withWeight.map(l=>parseFloat(l.weight))) : null;
+  const recentWeights = withWeight.slice(-5).map(l=>`${l.date}: ${l.weight}lbs × ${l.reps} reps`).join(', ');
+
+  const effortCounts = {ease:0,struggled:0,failed:0};
+  exLogs.forEach(l=>{ if(l.effort&&effortCounts[l.effort]!==undefined) effortCounts[l.effort]++; });
+
+  // Weight trend
+  const dayMax = {};
+  withWeight.forEach(l=>{ if(!dayMax[l.date]||parseFloat(l.weight)>dayMax[l.date]) dayMax[l.date]=parseFloat(l.weight); });
+  const progWeights = Object.entries(dayMax).sort((a,b)=>a[0].localeCompare(b[0])).map(e=>e[1]);
+  const trend = progWeights.length >= 2
+    ? (progWeights[progWeights.length-1] > progWeights[0] ? 'improving' : progWeights[progWeights.length-1] < progWeights[0] ? 'declining' : 'flat')
+    : 'not enough data';
+
+  const prompt = `You are an expert personal trainer. Analyze this specific exercise data and give honest, practical, concise feedback in 2–3 short paragraphs. No headers or bullet points.
+
+Exercise: ${ex}
+Total sets logged: ${exLogs.length}
+Sessions performed: ${[...new Set(exLogs.map(l=>l.date))].length}
+Personal record: ${pr ? pr+' lbs' : 'no weight data'}
+Recent entries: ${recentWeights||'no weight data'}
+Weight trend: ${trend}
+Effort breakdown — Passed with Ease: ${effortCounts.ease}, Struggled: ${effortCounts.struggled}, Failed: ${effortCounts.failed}
+
+Comment on: progression trend, whether the weight/effort suggests it's time to increase load, consistency, and 1 specific tip for this exercise.`;
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:prompt}]})});
+    const data = await res.json();
+    const text = (data.content?.[0]?.text||'').trim();
+    el.innerHTML = text.split('\n\n').filter(Boolean).map(p=>`<p>${p}</p>`).join('');
+  }catch{
+    el.innerHTML = `<p style="color:rgba(255,255,255,.4)">Could not load feedback. Tap refresh to try again.</p>`;
+  }
+}
+
+// ─── GOOGLE DRIVE SYNC ───────────────────────────────────────
+const GDRIVE_CLIENT_ID = '652674520927-d26b36rd4ubgks3nsh4b78eanktd4n7s.apps.googleusercontent.com';
+const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
+const GDRIVE_FILE_NAME = 'born2lift_sync.json';
+let gdriveToken = null;
+let gdriveFileId = localStorage.getItem('b2l_gdrive_file_id') || null;
+
+function gdriveSignIn(){
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: GDRIVE_CLIENT_ID,
+    scope: GDRIVE_SCOPE,
+    callback: async (resp) => {
+      if(resp.error){ showToast('⚠️ Google sign-in failed'); return; }
+      gdriveToken = resp.access_token;
+      // Get user info for display
+      try {
+        const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers:{Authorization:`Bearer ${gdriveToken}`}
+        });
+        const u = await r.json();
+        gdriveSetConnected(u.email);
+      } catch { gdriveSetConnected('Connected'); }
+    }
+  });
+  client.requestAccessToken();
+}
+
+function gdriveSetConnected(email){
+  document.getElementById('gdriveStatus').textContent = email;
+  document.getElementById('gdriveStatus').classList.add('connected');
+  document.getElementById('gdriveConnectBtn').style.display = 'none';
+  document.getElementById('gdriveBody').style.display = 'block';
+  showToast('✓ Google Drive connected');
+}
+
+function gdriveSignOut(){
+  if(gdriveToken) google.accounts.oauth2.revoke(gdriveToken);
+  gdriveToken = null;
+  document.getElementById('gdriveStatus').textContent = 'Not connected';
+  document.getElementById('gdriveStatus').classList.remove('connected');
+  document.getElementById('gdriveConnectBtn').style.display = 'block';
+  document.getElementById('gdriveBody').style.display = 'none';
+  document.getElementById('gdriveLastSync').textContent = '';
+  showToast('Signed out of Google Drive');
+}
+
+async function gdriveFindFile(){
+  const r = await fetch(
+    `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${GDRIVE_FILE_NAME}'&fields=files(id,name,modifiedTime)`,
+    {headers:{Authorization:`Bearer ${gdriveToken}`}}
+  );
+  const d = await r.json();
+  return d.files && d.files.length ? d.files[0] : null;
+}
+
+async function gdriveSave(){
+  if(!gdriveToken){ showToast('Connect Google Drive first'); return; }
+  showToast('⏳ Saving to Drive…');
+  const backup = JSON.stringify({version:1,savedAt:new Date().toISOString(),logs,exercises:EXERCISES,muscleConfig:MUSCLE_CONFIG});
+  try {
+    const existing = await gdriveFindFile();
+    let url, method;
+    if(existing){
+      url = `https://www.googleapis.com/upload/drive/v3/files/${existing.id}?uploadType=media`;
+      method = 'PATCH';
+    } else {
+      // Create with metadata first
+      const meta = await fetch('https://www.googleapis.com/drive/v3/files',{
+        method:'POST',
+        headers:{Authorization:`Bearer ${gdriveToken}`,'Content-Type':'application/json'},
+        body: JSON.stringify({name:GDRIVE_FILE_NAME,parents:['appDataFolder']})
+      });
+      const mj = await meta.json();
+      gdriveFileId = mj.id;
+      localStorage.setItem('b2l_gdrive_file_id', gdriveFileId);
+      url = `https://www.googleapis.com/upload/drive/v3/files/${gdriveFileId}?uploadType=media`;
+      method = 'PATCH';
+    }
+    await fetch(url,{
+      method,
+      headers:{Authorization:`Bearer ${gdriveToken}`,'Content-Type':'application/json'},
+      body: backup
+    });
+    const ts = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    document.getElementById('gdriveLastSync').textContent = `Last saved: ${ts}`;
+    showToast('☁️ Saved to Google Drive!');
+  } catch(e){
+    showToast('⚠️ Save failed — try again');
+  }
+}
+
+async function gdriveLoad(){
+  if(!gdriveToken){ showToast('Connect Google Drive first'); return; }
+  showToast('⏳ Loading from Drive…');
+  try {
+    const file = await gdriveFindFile();
+    if(!file){ showToast('No backup found on Drive'); return; }
+    const r = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,
+      {headers:{Authorization:`Bearer ${gdriveToken}`}}
+    );
+    const backup = await r.json();
+    if(!backup.version || !backup.logs){ showToast('⚠️ Invalid backup file'); return; }
+    logs = backup.logs || [];
+    EXERCISES = backup.exercises || {};
+    MUSCLE_CONFIG = backup.muscleConfig || {};
+    saveLogs(); saveExercises();
+    buildMuscleChips(); renderExportStats(); populateFilterOptions();
+    const ts = new Date(file.modifiedTime).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    document.getElementById('gdriveLastSync').textContent = `Last saved on Drive: ${ts}`;
+    showToast(`✓ Loaded ${logs.length} sets from Drive!`);
+  } catch(e){
+    showToast('⚠️ Load failed — try again');
+  }
+}
+
+init();
+
+</script>
+</body>
+</html>
