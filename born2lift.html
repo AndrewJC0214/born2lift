@@ -1065,14 +1065,39 @@ async function fetchInsight(){
     ?`Give me one real verified inspirational quote about fitness, hard work, discipline, or living better. Respond ONLY with JSON (no markdown): {"quote":"...","author":"..."}`
     :`Give me one short true fun fact. Random topic from: animals, video games, New York City, Mexico, Spanish language, English language, food, travel, clothing/fashion. Respond ONLY with JSON (no markdown): {"fact":"...","topic":"..."}`;
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data=await res.json();
     const parsed=JSON.parse((data.content?.[0]?.text||'').replace(/```json|```/g,'').trim());
     content.innerHTML = insightType==='quote'
       ?`<div class="insight-text">"${parsed.quote}"</div><div class="insight-source">— ${parsed.author}</div>`
       :`<div class="insight-text">${parsed.fact}</div><div class="insight-source">📌 ${parsed.topic}</div>`;
-  }catch{content.innerHTML=`<div class="insight-text" style="color:rgba(255,255,255,.45);font-style:normal">Tap ↻ to reload</div>`;}
+  } catch {
+    // Show a static fallback so the card never looks broken
+    const fallbackQuotes = [
+      {quote:"The only bad workout is the one that didn't happen.",author:"Unknown"},
+      {quote:"Strength doesn't come from what you can do. It comes from overcoming what you thought you couldn't.",author:"Rikki Rogers"},
+      {quote:"Take care of your body. It's the only place you have to live.",author:"Jim Rohn"},
+      {quote:"Success usually comes to those who are too busy to be looking for it.",author:"Henry David Thoreau"},
+      {quote:"If it doesn't challenge you, it won't change you.",author:"Fred DeVito"},
+    ];
+    const fallbackFacts = [
+      {fact:"Honey never spoils — archaeologists have found 3,000-year-old honey in Egyptian tombs that was still edible.",topic:"Food"},
+      {fact:"A group of flamingos is called a flamboyance.",topic:"Animals"},
+      {fact:"The New York City subway system has 472 stations, making it one of the largest in the world.",topic:"New York City"},
+      {fact:"The word 'muscle' comes from the Latin 'musculus', meaning 'little mouse' — because flexing biceps looks like a mouse moving under skin.",topic:"English Language"},
+      {fact:"Octopuses have three hearts and blue blood.",topic:"Animals"},
+    ];
+    const pool = insightType==='quote' ? fallbackQuotes : fallbackFacts;
+    const pick = pool[Math.floor(Math.random()*pool.length)];
+    content.innerHTML = insightType==='quote'
+      ?`<div class="insight-text">"${pick.quote}"</div><div class="insight-source">— ${pick.author}</div>`
+      :`<div class="insight-text">${pick.fact}</div><div class="insight-source">📌 ${pick.topic}</div>`;
+  }
 }
 
 // ─── EXERCISE SEARCH ─────────────────────────────────────────
@@ -1696,14 +1721,40 @@ function exportCSV(){
 }
 function exportExcel(){
   if(!logs.length){showToast('No data to export');return;}
-  const h=['Date','Muscle Group','Exercise','Sets','Reps','Weight (lbs)','Effort','Notes'];
-  const rows=logs.map(l=>[l.date,l.muscle,l.exercise,l.sets,l.reps,l.weight,l.effort||'',l.notes||'']);
-  let xml=`<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Born2Lift"><Table>`;
-  const toRow=cells=>`<Row>${cells.map(c=>`<Cell><Data ss:Type="String">${String(c).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</Data></Cell>`).join('')}</Row>`;
-  xml+=toRow(h); rows.forEach(r=>xml+=toRow(r));
-  xml+=`</Table></Worksheet></Workbook>`;
-  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([xml],{type:'application/vnd.ms-excel'})),download:`born2lift_${today()}.xls`});
-  a.click(); showToast('📊 Excel downloaded');
+  const h=['Date','Category','Muscle Group','Exercise','Sets','Reps','Weight (lbs)','Effort','Notes'];
+  const rows=logs.map(l=>[
+    l.date,
+    MUSCLE_CATEGORY[l.muscle]||'',
+    l.muscle,
+    l.exercise,
+    l.sets,
+    l.reps,
+    l.weight,
+    l.effort||'',
+    l.notes||''
+  ]);
+  // Build clean SpreadsheetML with proper encoding
+  const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const toRow = cells => `<Row>${cells.map(c=>`<Cell><Data ss:Type="String">${esc(c)}</Data></Cell>`).join('')}</Row>`;
+  const xml = [
+    `<?xml version="1.0" encoding="UTF-8"?>`,
+    `<?mso-application progid="Excel.Sheet"?>`,
+    `<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"`,
+    ` xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"`,
+    ` xmlns:x="urn:schemas-microsoft-com:office:excel">`,
+    `<Styles><Style ss:ID="h"><Font ss:Bold="1"/><Interior ss:Color="#f0fdf4" ss:Pattern="Solid"/></Style></Styles>`,
+    `<Worksheet ss:Name="Born2Lift"><Table>`,
+    `<Row>${h.map(c=>`<Cell ss:StyleID="h"><Data ss:Type="String">${esc(c)}</Data></Cell>`).join('')}</Row>`,
+    ...rows.map(r=>toRow(r)),
+    `</Table></Worksheet></Workbook>`
+  ].join('\n');
+  const blob = new Blob([xml], {type:'application/vnd.ms-excel;charset=utf-8'});
+  const a = Object.assign(document.createElement('a'),{
+    href: URL.createObjectURL(blob),
+    download: `born2lift_${today()}.xls`
+  });
+  a.click();
+  showToast('📊 Excel downloaded');
 }
 
 
