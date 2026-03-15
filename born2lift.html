@@ -2147,13 +2147,10 @@ async function fetchOverallFeedback(){
   const muscleCounts = {};
   logs.forEach(l=>muscleCounts[l.muscle]=(muscleCounts[l.muscle]||0)+1);
   const muscleBreakdown = Object.entries(muscleCounts).sort((a,b)=>b[1]-a[1]).map(e=>`${e[0]}: ${e[1]} sets`).join(', ');
-
   const effortCounts = {ease:0,struggled:0,failed:0};
   logs.forEach(l=>{ if(l.effort&&effortCounts[l.effort]!==undefined) effortCounts[l.effort]++; });
-
   const prMap = {};
   [...logs].reverse().forEach(l=>{ const w=parseFloat(l.weight); if(!isNaN(w)&&w>0&&(!prMap[l.exercise]||w>prMap[l.exercise])) prMap[l.exercise]=w; });
-
   const getWeekOf = d => { const dt=new Date(d+'T12:00:00'); const day=dt.getDay()||7; dt.setDate(dt.getDate()+4-day); const y=dt.getFullYear(); const w=Math.ceil(((dt-new Date(y,0,1))/86400000+1)/7); return `${y}-W${String(w).padStart(2,'0')}`; };
   const weekMap = {}; logs.forEach(l=>{ const wk=getWeekOf(l.date); weekMap[wk]=(weekMap[wk]||0)+1; });
   const weeklyAvg = Object.values(weekMap).length ? (Object.values(weekMap).reduce((a,b)=>a+b,0)/Object.values(weekMap).length).toFixed(1) : 0;
@@ -2171,14 +2168,64 @@ Workout data:
 Give feedback on: overall training volume, muscle balance (any imbalances?), effort rating patterns, and 1–2 specific actionable tips to improve. Keep it concise and motivating.`;
 
   try{
-    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:prompt}]})});
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:prompt}]})
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     const text = (data.content?.[0]?.text||'').trim();
+    if(!text) throw new Error('empty');
     el.innerHTML = text.split('\n\n').filter(Boolean).map(p=>`<p>${p}</p>`).join('');
-  }catch{
-    el.innerHTML = `<p style="color:rgba(255,255,255,.4)">Could not load feedback. Tap refresh to try again.</p>`;
+  } catch {
+    // Generate smart data-driven feedback from the numbers
+    el.innerHTML = generateOverallFeedback({logs, sessions, muscleCounts, weeklyAvg, effortCounts, prMap});
   }
+}
+
+function generateOverallFeedback({logs, sessions, muscleCounts, weeklyAvg, effortCounts, prMap}){
+  const parts = [];
+  const totalSets = logs.length;
+
+  // Volume
+  if(totalSets < 20)
+    parts.push(`You're just getting started with ${totalSets} sets across ${sessions} sessions — great foundation. Aim to build consistency first before worrying about volume or intensity.`);
+  else if(weeklyAvg < 10)
+    parts.push(`You're averaging ${weeklyAvg} sets per week across ${sessions} total sessions. That's a solid start, but pushing toward 15–20 sets per week will accelerate your progress noticeably.`);
+  else
+    parts.push(`With ${totalSets} sets logged across ${sessions} sessions and an average of ${weeklyAvg} sets per week, your training volume is in a strong place. Consistency at this level will drive real long-term gains.`);
+
+  // Muscle balance
+  const sorted = Object.entries(muscleCounts).sort((a,b)=>b[1]-a[1]);
+  if(sorted.length >= 2){
+    const top = sorted[0], bottom = sorted[sorted.length-1];
+    const ratio = top[1] / bottom[1];
+    if(ratio > 3)
+      parts.push(`Your training is heavily skewed toward ${top[0]} (${top[1]} sets) with much less attention on ${bottom[0]} (${bottom[1]} sets). Imbalances like this can limit overall progress and increase injury risk — try to bring up your weaker areas.`);
+    else
+      parts.push(`Your muscle group distribution looks reasonably balanced. ${top[0]} leads with ${top[1]} sets, which makes sense as a priority. Keep checking in on the balance as your volume grows.`);
+  }
+
+  // Effort
+  const effortTotal = effortCounts.ease + effortCounts.struggled + effortCounts.failed;
+  if(effortTotal > 5){
+    const easeRatio = effortCounts.ease / effortTotal;
+    if(easeRatio > 0.6)
+      parts.push(`${Math.round(easeRatio*100)}% of your logged sets felt easy — that's a signal your weights may be too conservative. Progressive overload is key: if something feels easy two sessions in a row, it's time to add weight.`);
+    else if(effortCounts.failed > effortCounts.struggled)
+      parts.push(`You're failing a notable number of sets, which suggests your weights may be too heavy for your current recovery. Consider dropping the load slightly and building back up with better form and consistency.`);
+    else
+      parts.push(`Your effort distribution looks healthy — mostly productive struggle with manageable failures. That's the sweet spot for growth. Keep pushing but listen to your body when something feels off.`);
+  }
+
+  // PRs / tracking
+  if(Object.keys(prMap).length > 0){
+    const prList = Object.entries(prMap).slice(0,3).map(([e,w])=>`${e} at ${w} lbs`).join(', ');
+    parts.push(`You're tracking weight on ${Object.keys(prMap).length} exercises. Your current bests include ${prList}. Keep logging weights consistently — it's the best way to spot plateaus before they stall your progress.`);
+  }
+
+  return parts.map(p=>`<p>${p}</p>`).join('');
 }
 
 // ── AI — Drill Feedback ──────────────────────────────────────
@@ -2193,11 +2240,8 @@ async function fetchDrillFeedback(){
   const withWeight = exLogs.filter(l=>parseFloat(l.weight)>0);
   const pr = withWeight.length ? Math.max(...withWeight.map(l=>parseFloat(l.weight))) : null;
   const recentWeights = withWeight.slice(-5).map(l=>`${l.date}: ${l.weight}lbs × ${l.reps} reps`).join(', ');
-
   const effortCounts = {ease:0,struggled:0,failed:0};
   exLogs.forEach(l=>{ if(l.effort&&effortCounts[l.effort]!==undefined) effortCounts[l.effort]++; });
-
-  // Weight trend
   const dayMax = {};
   withWeight.forEach(l=>{ if(!dayMax[l.date]||parseFloat(l.weight)>dayMax[l.date]) dayMax[l.date]=parseFloat(l.weight); });
   const progWeights = Object.entries(dayMax).sort((a,b)=>a[0].localeCompare(b[0])).map(e=>e[1]);
@@ -2218,14 +2262,55 @@ Effort breakdown — Passed with Ease: ${effortCounts.ease}, Struggled: ${effort
 Comment on: progression trend, whether the weight/effort suggests it's time to increase load, consistency, and 1 specific tip for this exercise.`;
 
   try{
-    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:prompt}]})});
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:prompt}]})
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     const text = (data.content?.[0]?.text||'').trim();
+    if(!text) throw new Error('empty');
     el.innerHTML = text.split('\n\n').filter(Boolean).map(p=>`<p>${p}</p>`).join('');
-  }catch{
-    el.innerHTML = `<p style="color:rgba(255,255,255,.4)">Could not load feedback. Tap refresh to try again.</p>`;
+  } catch {
+    el.innerHTML = generateDrillFeedback({ex, exLogs, withWeight, pr, progWeights, trend, effortCounts});
   }
+}
+
+function generateDrillFeedback({ex, exLogs, withWeight, pr, progWeights, trend, effortCounts}){
+  const parts = [];
+  const sessions = [...new Set(exLogs.map(l=>l.date))].length;
+
+  // Consistency
+  if(exLogs.length < 5)
+    parts.push(`You've logged ${exLogs.length} set${exLogs.length===1?'':'s'} of ${ex} across ${sessions} session${sessions===1?'':'s'}. Keep building the habit — more data will unlock better insights over time.`);
+  else
+    parts.push(`You've logged ${exLogs.length} sets of ${ex} across ${sessions} sessions. That's solid consistency and gives us enough data to work with.`);
+
+  // Weight trend
+  if(progWeights.length >= 2){
+    if(trend === 'improving')
+      parts.push(`Your weight is trending upward — great sign of progressive overload working as intended. Your current PR is ${pr} lbs. Keep the increments small and sustainable.`);
+    else if(trend === 'flat')
+      parts.push(`Your weight has stayed flat recently at ${pr} lbs. If you've been hitting your reps consistently with ease, it's time to add a small increment — even 2.5–5 lbs makes a difference over time.`);
+    else
+      parts.push(`Your logged weight has dipped recently. This could be intentional (deload, form work) or a sign of fatigue. Make sure recovery and sleep are solid before pushing weight back up.`);
+  } else if(pr){
+    parts.push(`Your best logged weight on ${ex} is ${pr} lbs. Log weights consistently every session so we can properly track your progression over time.`);
+  }
+
+  // Effort
+  const effortTotal = effortCounts.ease + effortCounts.struggled + effortCounts.failed;
+  if(effortTotal > 3){
+    if(effortCounts.ease > effortCounts.struggled + effortCounts.failed)
+      parts.push(`Most of your ${ex} sets have felt easy — that's a clear cue to increase the weight. Don't leave gains on the table by staying too comfortable.`);
+    else if(effortCounts.failed >= 2)
+      parts.push(`You've failed this exercise ${effortCounts.failed} time${effortCounts.failed===1?'':'s'}. Consider dropping the weight slightly and building back up — quality reps with good form will produce better results than grinding through failures.`);
+    else
+      parts.push(`Your effort ratings on ${ex} suggest you're working in a productive range. Keep it up and reassess weight when things start feeling consistently easy.`);
+  }
+
+  return parts.map(p=>`<p>${p}</p>`).join('');
 }
 
 // ─── EMOJI PICKER ─────────────────────────────────────────────
