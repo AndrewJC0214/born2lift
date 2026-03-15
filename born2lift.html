@@ -171,7 +171,7 @@
 
     .muscle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 20px 4px;margin:4px 0 0}
     .muscle-chip{display:flex;align-items:center;gap:7px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:all .18s;box-shadow:var(--shadow-sm);width:100%}
-    .muscle-chip .chip-emoji{font-size:16px;line-height:1;flex-shrink:0}
+    .muscle-chip .chip-emoji{display:none}
     .muscle-chip span:last-child{flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .muscle-chip:active{transform:scale(.97)}
     .muscle-chip.active{background:var(--text);border-color:var(--text);color:#fff;box-shadow:0 3px 10px rgba(13,15,20,.25)}
@@ -1000,14 +1000,14 @@ function showSubgroups(cat){
 
   const subRow = document.getElementById('subgroupRow');
   const chipsEl = document.getElementById('muscleChips');
-  document.getElementById('subgroupLabel').textContent = `${cfg.emoji} ${cat} — Choose Muscle`;
+  document.getElementById('subgroupLabel').textContent = `${cat} — Choose Muscle`;
   subRow.style.display = 'block';
   chipsEl.innerHTML = '';
   subgroups.forEach(muscle=>{
     const mcfg = getMuscleConfig(muscle);
     const chip = document.createElement('button');
     chip.className = 'muscle-chip';
-    chip.innerHTML = `<span class="chip-emoji">${mcfg.emoji}</span><span>${muscle}</span>`;
+    chip.innerHTML = `<span>${muscle}</span>`;
     chip.onclick = ()=>selectMuscle(muscle, chip);
     chipsEl.appendChild(chip);
   });
@@ -1204,7 +1204,7 @@ function selectMuscle(muscle, chip){
   document.getElementById('musclePrompt').style.display='none';
   document.getElementById('exerciseSection').style.display='block';
   const cfg=getMuscleConfig(muscle);
-  document.getElementById('exerciseLabel').textContent=`${cfg.emoji}  ${muscle} Exercises`;
+  document.getElementById('exerciseLabel').textContent=`${muscle} Exercises`;
   renderExerciseList(muscle);
 }
 
@@ -1231,7 +1231,6 @@ function renderExerciseList(muscle){
       </button>`).join('');
     card.innerHTML=`
       <div class="exercise-card-header" onclick="toggleCard(this.parentElement)">
-        <div class="exercise-icon" style="background:${cfg.bg}">${cfg.emoji}</div>
         <div class="exercise-text"><div class="exercise-name">${ex}</div><div class="exercise-muscle-tag">${muscle}</div></div>
         <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
@@ -1506,7 +1505,6 @@ function renderExercisesTab(){
 
       group.innerHTML = `
         <div class="ex-mgmt-group-header" onclick="toggleExGroup('${muscle}')">
-          <button class="ex-mgmt-group-emoji emoji-pick-btn" onclick="event.stopPropagation();openEmojiPicker('${muscle}')" title="Change emoji">${cfg.emoji}</button>
           <span class="ex-mgmt-group-name">${muscle}</span>
           <span class="ex-mgmt-group-count">${orderedItems.length}</span>
           <button class="ex-mgmt-group-del" onclick="event.stopPropagation();askDeleteMuscle('${muscle}')" title="Remove group">🗑️</button>
