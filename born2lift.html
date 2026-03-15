@@ -96,24 +96,6 @@
     .date-selector input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.5);cursor:pointer}
 
     /* INSIGHT CARD */
-    .insight-card{margin:16px 20px 0;border-radius:var(--radius);padding:14px 16px;position:relative;overflow:hidden;min-height:72px;display:flex;align-items:flex-start;gap:12px}
-    .insight-card.quote-style{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(139,92,246,.3)}
-    .insight-card.fact-style{background:linear-gradient(135deg,#0a1f14,#0f2a1a);border:1px solid rgba(34,197,94,.3)}
-    .insight-icon{font-size:22px;flex-shrink:0;margin-top:1px}
-    .insight-body{flex:1}
-    .insight-type-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
-    .quote-style .insight-type-label{color:rgba(139,92,246,.9)}
-    .fact-style .insight-type-label{color:rgba(34,197,94,.9)}
-    .insight-text{font-size:12.5px;line-height:1.55;color:rgba(255,255,255,.85);font-style:italic}
-    .insight-source{font-size:10.5px;color:rgba(255,255,255,.4);margin-top:5px;font-style:normal;font-weight:500}
-    .insight-loading{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.4);font-size:12px}
-    .dot-pulse{display:flex;gap:4px}
-    .dot-pulse span{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.3);animation:dpulse 1.2s infinite ease-in-out}
-    .dot-pulse span:nth-child(2){animation-delay:.2s}
-    .dot-pulse span:nth-child(3){animation-delay:.4s}
-    @keyframes dpulse{0%,80%,100%{transform:scale(.6);opacity:.3}40%{transform:scale(1);opacity:1}}
-    .insight-refresh{position:absolute;top:10px;right:12px;background:none;border:none;cursor:pointer;color:rgba(255,255,255,.25);font-size:16px;transition:color .2s,transform .3s;padding:2px}
-    .insight-refresh:hover{color:rgba(255,255,255,.6);transform:rotate(45deg)}
 
     /* PLATEAU ALERT */
     .plateau-alert{margin:12px 20px 0;background:linear-gradient(135deg,#2d1a00,#3d2200);border:1px solid rgba(245,158,11,.35);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:flex-start;gap:10px}
@@ -458,18 +440,6 @@ padding:18px 20px 8px;font-size:11px;font-weight:600;letter-spacing:.07em;text-t
 
     .az-line-wrap{position:relative;height:160px;width:100%}
 
-    /* AI FEEDBACK CARD */
-    .az-ai-card{margin:12px 20px 0;background:linear-gradient(135deg,#0a1428,#150a28);border:1px solid rgba(139,92,246,.25);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden}
-    .az-ai-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(139,92,246,.2) 0%,transparent 70%);border-radius:50%}
-    .az-ai-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-    .az-ai-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-    .az-ai-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(139,92,246,.9)}
-    .az-ai-title{font-family:var(--font-display);font-size:13px;font-weight:700;color:#fff;margin-top:1px}
-    .az-ai-body{font-size:13px;line-height:1.65;color:rgba(255,255,255,.78)}
-    .az-ai-body p{margin-bottom:8px}
-    .az-ai-body p:last-child{margin-bottom:0}
-    .az-ai-loading{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.35);font-size:12px}
-    .az-ai-refresh{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:rgba(255,255,255,.45);font-size:11px;font-weight:600;padding:5px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;margin-top:12px;transition:background .15s}
     .az-ai-refresh:hover{background:rgba(255,255,255,.12)}
 
     /* STREAK CARD */
@@ -516,14 +486,6 @@ padding:18px 20px 8px;font-size:11px;font-weight:600;letter-spacing:.07em;text-t
         </svg>
         <input type="date" id="logDate"/>
       </div>
-    </div>
-    <div class="insight-card quote-style" id="insightCard">
-      <div class="insight-icon" id="insightIcon">💬</div>
-      <div class="insight-body">
-        <div class="insight-type-label" id="insightTypeLabel">Quote</div>
-        <div id="insightContent"><div class="insight-loading"><div class="dot-pulse"><span></span><span></span><span></span></div><span>Loading…</span></div></div>
-      </div>
-      <button class="insight-refresh" onclick="fetchInsight()" title="Refresh">↻</button>
     </div>
 
     <!-- Plateau alerts -->
@@ -659,21 +621,6 @@ padding:18px 20px 8px;font-size:11px;font-weight:600;letter-spacing:.07em;text-t
     </div>
 
     <div id="az-content">
-      <!-- AI overall feedback — top -->
-      <div class="az-ai-card" id="azOverallAI" style="margin-top:16px">
-        <div class="az-ai-header">
-          <div class="az-ai-icon">🤖</div>
-          <div>
-            <div class="az-ai-label">AI Coach</div>
-            <div class="az-ai-title">Overall Feedback</div>
-          </div>
-        </div>
-        <div class="az-ai-body" id="azOverallAIBody">
-          <div class="az-ai-loading"><div class="dot-pulse"><span></span><span></span><span></span></div><span>Analyzing your training…</span></div>
-        </div>
-        <button class="az-ai-refresh" onclick="fetchOverallFeedback()">↻ Refresh feedback</button>
-      </div>
-
       <!-- Quick stats -->
       <div class="az-stats-grid" id="azStatsGrid"></div>
 
@@ -922,7 +869,6 @@ let dateFilterMode = '';
 let pendingDeleteId = null;
 let pendingDeleteType = 'log';
 let pendingDeleteMeta = null;
-let insightType = 'fact';
 let openCategory = null; // which category is currently expanded
 
 const EFFORT_OPTIONS = [
@@ -939,7 +885,6 @@ function init(){
   document.getElementById('logDate').value = now.toISOString().split('T')[0];
   buildMuscleChips();
   renderExportStats();
-  fetchInsight();
   checkPlateaus();
   // Restore Google Drive session after GIS script loads
   window.addEventListener('load', ()=>{ setTimeout(gdriveInit, 500); });
@@ -1074,52 +1019,6 @@ function checkPlateaus(){
 }
 
 // ─── AI INSIGHT ───────────────────────────────────────────────
-async function fetchInsight(){
-  insightType = insightType==='quote'?'fact':'quote';
-  const card=document.getElementById('insightCard'), icon=document.getElementById('insightIcon'),
-        label=document.getElementById('insightTypeLabel'), content=document.getElementById('insightContent');
-  card.className=`insight-card ${insightType==='quote'?'quote-style':'fact-style'}`;
-  icon.textContent=insightType==='quote'?'💬':'🧠';
-  label.textContent=insightType==='quote'?'Quote':'Fun Fact';
-  content.innerHTML=`<div class="insight-loading"><div class="dot-pulse"><span></span><span></span><span></span></div><span>Loading…</span></div>`;
-  const prompt = insightType==='quote'
-    ?`Give me one real verified inspirational quote about fitness, hard work, discipline, or living better. Respond ONLY with JSON (no markdown): {"quote":"...","author":"..."}`
-    :`Give me one short true fun fact. Random topic from: animals, video games, New York City, Mexico, Spanish language, English language, food, travel, clothing/fashion. Respond ONLY with JSON (no markdown): {"fact":"...","topic":"..."}`;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})
-    });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data=await res.json();
-    const parsed=JSON.parse((data.content?.[0]?.text||'').replace(/```json|```/g,'').trim());
-    content.innerHTML = insightType==='quote'
-      ?`<div class="insight-text">"${parsed.quote}"</div><div class="insight-source">— ${parsed.author}</div>`
-      :`<div class="insight-text">${parsed.fact}</div><div class="insight-source">📌 ${parsed.topic}</div>`;
-  } catch {
-    // Show a static fallback so the card never looks broken
-    const fallbackQuotes = [
-      {quote:"The only bad workout is the one that didn't happen.",author:"Unknown"},
-      {quote:"Strength doesn't come from what you can do. It comes from overcoming what you thought you couldn't.",author:"Rikki Rogers"},
-      {quote:"Take care of your body. It's the only place you have to live.",author:"Jim Rohn"},
-      {quote:"Success usually comes to those who are too busy to be looking for it.",author:"Henry David Thoreau"},
-      {quote:"If it doesn't challenge you, it won't change you.",author:"Fred DeVito"},
-    ];
-    const fallbackFacts = [
-      {fact:"Honey never spoils — archaeologists have found 3,000-year-old honey in Egyptian tombs that was still edible.",topic:"Food"},
-      {fact:"A group of flamingos is called a flamboyance.",topic:"Animals"},
-      {fact:"The New York City subway system has 472 stations, making it one of the largest in the world.",topic:"New York City"},
-      {fact:"The word 'muscle' comes from the Latin 'musculus', meaning 'little mouse' — because flexing biceps looks like a mouse moving under skin.",topic:"English Language"},
-      {fact:"Octopuses have three hearts and blue blood.",topic:"Animals"},
-    ];
-    const pool = insightType==='quote' ? fallbackQuotes : fallbackFacts;
-    const pick = pool[Math.floor(Math.random()*pool.length)];
-    content.innerHTML = insightType==='quote'
-      ?`<div class="insight-text">"${pick.quote}"</div><div class="insight-source">— ${pick.author}</div>`
-      :`<div class="insight-text">${pick.fact}</div><div class="insight-source">📌 ${pick.topic}</div>`;
-  }
-}
 
 // ─── EXERCISE SEARCH ─────────────────────────────────────────
 function renderExSearch(){
@@ -1848,7 +1747,6 @@ function renderAnalyze(){
   renderMuscleDonut();
   renderWeeklyBar();
   populateAzExSelect();
-  fetchOverallFeedback();
   document.getElementById('azDrillContent').innerHTML='';
 }
 
@@ -2086,19 +1984,6 @@ function renderDrillDown(){
       ${prHTML}
       ${effortHTML}
       ${chartHTML}
-    </div>
-    <div class="az-ai-card" id="azDrillAI" style="margin-bottom:8px">
-      <div class="az-ai-header">
-        <div class="az-ai-icon">🤖</div>
-        <div>
-          <div class="az-ai-label">AI Coach</div>
-          <div class="az-ai-title">${ex} Feedback</div>
-        </div>
-      </div>
-      <div class="az-ai-body" id="azDrillAIBody">
-        <div class="az-ai-loading"><div class="dot-pulse"><span></span><span></span><span></span></div><span>Analyzing ${ex}…</span></div>
-      </div>
-      <button class="az-ai-refresh" onclick="fetchDrillFeedback()">↻ Refresh feedback</button>
     </div>`;
 
   // Draw line chart if enough data
@@ -2134,183 +2019,6 @@ function renderDrillDown(){
       });
     },50);
   }
-
-  fetchDrillFeedback();
-}
-
-// ── AI — Overall Feedback ────────────────────────────────────
-async function fetchOverallFeedback(){
-  const el = document.getElementById('azOverallAIBody');
-  el.innerHTML = `<div class="az-ai-loading"><div class="dot-pulse"><span></span><span></span><span></span></div><span>Analyzing your training…</span></div>`;
-
-  const sessions = [...new Set(logs.map(l=>l.date))].length;
-  const muscleCounts = {};
-  logs.forEach(l=>muscleCounts[l.muscle]=(muscleCounts[l.muscle]||0)+1);
-  const muscleBreakdown = Object.entries(muscleCounts).sort((a,b)=>b[1]-a[1]).map(e=>`${e[0]}: ${e[1]} sets`).join(', ');
-  const effortCounts = {ease:0,struggled:0,failed:0};
-  logs.forEach(l=>{ if(l.effort&&effortCounts[l.effort]!==undefined) effortCounts[l.effort]++; });
-  const prMap = {};
-  [...logs].reverse().forEach(l=>{ const w=parseFloat(l.weight); if(!isNaN(w)&&w>0&&(!prMap[l.exercise]||w>prMap[l.exercise])) prMap[l.exercise]=w; });
-  const getWeekOf = d => { const dt=new Date(d+'T12:00:00'); const day=dt.getDay()||7; dt.setDate(dt.getDate()+4-day); const y=dt.getFullYear(); const w=Math.ceil(((dt-new Date(y,0,1))/86400000+1)/7); return `${y}-W${String(w).padStart(2,'0')}`; };
-  const weekMap = {}; logs.forEach(l=>{ const wk=getWeekOf(l.date); weekMap[wk]=(weekMap[wk]||0)+1; });
-  const weeklyAvg = Object.values(weekMap).length ? (Object.values(weekMap).reduce((a,b)=>a+b,0)/Object.values(weekMap).length).toFixed(1) : 0;
-
-  const prompt = `You are an expert personal trainer analyzing someone's workout data. Be encouraging but honest, specific, and practical. Write 3–4 short focused paragraphs. No headers or bullet points — just clean flowing advice.
-
-Workout data:
-- Total sets logged: ${logs.length}
-- Total sessions: ${sessions}
-- Avg sets per week: ${weeklyAvg}
-- Muscle group breakdown: ${muscleBreakdown}
-- Effort ratings — Passed with Ease: ${effortCounts.ease}, Passed & Struggled: ${effortCounts.struggled}, Failed: ${effortCounts.failed}
-- Exercises tracked with weight: ${Object.keys(prMap).length}
-
-Give feedback on: overall training volume, muscle balance (any imbalances?), effort rating patterns, and 1–2 specific actionable tips to improve. Keep it concise and motivating.`;
-
-  try{
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:prompt}]})
-    });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const text = (data.content?.[0]?.text||'').trim();
-    if(!text) throw new Error('empty');
-    el.innerHTML = text.split('\n\n').filter(Boolean).map(p=>`<p>${p}</p>`).join('');
-  } catch {
-    // Generate smart data-driven feedback from the numbers
-    el.innerHTML = generateOverallFeedback({logs, sessions, muscleCounts, weeklyAvg, effortCounts, prMap});
-  }
-}
-
-function generateOverallFeedback({logs, sessions, muscleCounts, weeklyAvg, effortCounts, prMap}){
-  const parts = [];
-  const totalSets = logs.length;
-
-  // Volume
-  if(totalSets < 20)
-    parts.push(`You're just getting started with ${totalSets} sets across ${sessions} sessions — great foundation. Aim to build consistency first before worrying about volume or intensity.`);
-  else if(weeklyAvg < 10)
-    parts.push(`You're averaging ${weeklyAvg} sets per week across ${sessions} total sessions. That's a solid start, but pushing toward 15–20 sets per week will accelerate your progress noticeably.`);
-  else
-    parts.push(`With ${totalSets} sets logged across ${sessions} sessions and an average of ${weeklyAvg} sets per week, your training volume is in a strong place. Consistency at this level will drive real long-term gains.`);
-
-  // Muscle balance
-  const sorted = Object.entries(muscleCounts).sort((a,b)=>b[1]-a[1]);
-  if(sorted.length >= 2){
-    const top = sorted[0], bottom = sorted[sorted.length-1];
-    const ratio = top[1] / bottom[1];
-    if(ratio > 3)
-      parts.push(`Your training is heavily skewed toward ${top[0]} (${top[1]} sets) with much less attention on ${bottom[0]} (${bottom[1]} sets). Imbalances like this can limit overall progress and increase injury risk — try to bring up your weaker areas.`);
-    else
-      parts.push(`Your muscle group distribution looks reasonably balanced. ${top[0]} leads with ${top[1]} sets, which makes sense as a priority. Keep checking in on the balance as your volume grows.`);
-  }
-
-  // Effort
-  const effortTotal = effortCounts.ease + effortCounts.struggled + effortCounts.failed;
-  if(effortTotal > 5){
-    const easeRatio = effortCounts.ease / effortTotal;
-    if(easeRatio > 0.6)
-      parts.push(`${Math.round(easeRatio*100)}% of your logged sets felt easy — that's a signal your weights may be too conservative. Progressive overload is key: if something feels easy two sessions in a row, it's time to add weight.`);
-    else if(effortCounts.failed > effortCounts.struggled)
-      parts.push(`You're failing a notable number of sets, which suggests your weights may be too heavy for your current recovery. Consider dropping the load slightly and building back up with better form and consistency.`);
-    else
-      parts.push(`Your effort distribution looks healthy — mostly productive struggle with manageable failures. That's the sweet spot for growth. Keep pushing but listen to your body when something feels off.`);
-  }
-
-  // PRs / tracking
-  if(Object.keys(prMap).length > 0){
-    const prList = Object.entries(prMap).slice(0,3).map(([e,w])=>`${e} at ${w} lbs`).join(', ');
-    parts.push(`You're tracking weight on ${Object.keys(prMap).length} exercises. Your current bests include ${prList}. Keep logging weights consistently — it's the best way to spot plateaus before they stall your progress.`);
-  }
-
-  return parts.map(p=>`<p>${p}</p>`).join('');
-}
-
-// ── AI — Drill Feedback ──────────────────────────────────────
-async function fetchDrillFeedback(){
-  const ex = document.getElementById('azExSelect').value;
-  const el = document.getElementById('azDrillAIBody');
-  if(!ex||!el) return;
-
-  el.innerHTML = `<div class="az-ai-loading"><div class="dot-pulse"><span></span><span></span><span></span></div><span>Analyzing ${ex}…</span></div>`;
-
-  const exLogs = logs.filter(l=>l.exercise===ex).sort((a,b)=>a.date.localeCompare(b.date));
-  const withWeight = exLogs.filter(l=>parseFloat(l.weight)>0);
-  const pr = withWeight.length ? Math.max(...withWeight.map(l=>parseFloat(l.weight))) : null;
-  const recentWeights = withWeight.slice(-5).map(l=>`${l.date}: ${l.weight}lbs × ${l.reps} reps`).join(', ');
-  const effortCounts = {ease:0,struggled:0,failed:0};
-  exLogs.forEach(l=>{ if(l.effort&&effortCounts[l.effort]!==undefined) effortCounts[l.effort]++; });
-  const dayMax = {};
-  withWeight.forEach(l=>{ if(!dayMax[l.date]||parseFloat(l.weight)>dayMax[l.date]) dayMax[l.date]=parseFloat(l.weight); });
-  const progWeights = Object.entries(dayMax).sort((a,b)=>a[0].localeCompare(b[0])).map(e=>e[1]);
-  const trend = progWeights.length >= 2
-    ? (progWeights[progWeights.length-1] > progWeights[0] ? 'improving' : progWeights[progWeights.length-1] < progWeights[0] ? 'declining' : 'flat')
-    : 'not enough data';
-
-  const prompt = `You are an expert personal trainer. Analyze this specific exercise data and give honest, practical, concise feedback in 2–3 short paragraphs. No headers or bullet points.
-
-Exercise: ${ex}
-Total sets logged: ${exLogs.length}
-Sessions performed: ${[...new Set(exLogs.map(l=>l.date))].length}
-Personal record: ${pr ? pr+' lbs' : 'no weight data'}
-Recent entries: ${recentWeights||'no weight data'}
-Weight trend: ${trend}
-Effort breakdown — Passed with Ease: ${effortCounts.ease}, Struggled: ${effortCounts.struggled}, Failed: ${effortCounts.failed}
-
-Comment on: progression trend, whether the weight/effort suggests it's time to increase load, consistency, and 1 specific tip for this exercise.`;
-
-  try{
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:prompt}]})
-    });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const text = (data.content?.[0]?.text||'').trim();
-    if(!text) throw new Error('empty');
-    el.innerHTML = text.split('\n\n').filter(Boolean).map(p=>`<p>${p}</p>`).join('');
-  } catch {
-    el.innerHTML = generateDrillFeedback({ex, exLogs, withWeight, pr, progWeights, trend, effortCounts});
-  }
-}
-
-function generateDrillFeedback({ex, exLogs, withWeight, pr, progWeights, trend, effortCounts}){
-  const parts = [];
-  const sessions = [...new Set(exLogs.map(l=>l.date))].length;
-
-  // Consistency
-  if(exLogs.length < 5)
-    parts.push(`You've logged ${exLogs.length} set${exLogs.length===1?'':'s'} of ${ex} across ${sessions} session${sessions===1?'':'s'}. Keep building the habit — more data will unlock better insights over time.`);
-  else
-    parts.push(`You've logged ${exLogs.length} sets of ${ex} across ${sessions} sessions. That's solid consistency and gives us enough data to work with.`);
-
-  // Weight trend
-  if(progWeights.length >= 2){
-    if(trend === 'improving')
-      parts.push(`Your weight is trending upward — great sign of progressive overload working as intended. Your current PR is ${pr} lbs. Keep the increments small and sustainable.`);
-    else if(trend === 'flat')
-      parts.push(`Your weight has stayed flat recently at ${pr} lbs. If you've been hitting your reps consistently with ease, it's time to add a small increment — even 2.5–5 lbs makes a difference over time.`);
-    else
-      parts.push(`Your logged weight has dipped recently. This could be intentional (deload, form work) or a sign of fatigue. Make sure recovery and sleep are solid before pushing weight back up.`);
-  } else if(pr){
-    parts.push(`Your best logged weight on ${ex} is ${pr} lbs. Log weights consistently every session so we can properly track your progression over time.`);
-  }
-
-  // Effort
-  const effortTotal = effortCounts.ease + effortCounts.struggled + effortCounts.failed;
-  if(effortTotal > 3){
-    if(effortCounts.ease > effortCounts.struggled + effortCounts.failed)
-      parts.push(`Most of your ${ex} sets have felt easy — that's a clear cue to increase the weight. Don't leave gains on the table by staying too comfortable.`);
-    else if(effortCounts.failed >= 2)
-      parts.push(`You've failed this exercise ${effortCounts.failed} time${effortCounts.failed===1?'':'s'}. Consider dropping the weight slightly and building back up — quality reps with good form will produce better results than grinding through failures.`);
-    else
-      parts.push(`Your effort ratings on ${ex} suggest you're working in a productive range. Keep it up and reassess weight when things start feeling consistently easy.`);
-  }
-
-  return parts.map(p=>`<p>${p}</p>`).join('');
 }
 
 // ─── EMOJI PICKER ─────────────────────────────────────────────
