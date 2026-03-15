@@ -941,6 +941,8 @@ function init(){
   renderExportStats();
   fetchInsight();
   checkPlateaus();
+  // Restore Google Drive session after GIS script loads
+  window.addEventListener('load', ()=>{ setTimeout(gdriveInit, 500); });
 }
 
 function buildMuscleChips(){
@@ -2284,6 +2286,39 @@ const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
 const GDRIVE_FILE_NAME = 'born2lift_sync.json';
 let gdriveToken = null;
 let gdriveFileId = localStorage.getItem('b2l_gdrive_file_id') || null;
+let gdriveEmail = localStorage.getItem('b2l_gdrive_email') || null;
+
+function gdriveInit(){
+  // If we have a stored email, try silent re-auth on load
+  if(gdriveEmail){
+    gdriveRestoreSession();
+  }
+}
+
+function gdriveRestoreSession(){
+  // Show UI as connected immediately with stored email
+  gdriveSetConnectedUI(gdriveEmail, false);
+  // Silently get a fresh token in the background
+  try{
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: GDRIVE_CLIENT_ID,
+      scope: GDRIVE_SCOPE,
+      prompt: '',
+      hint: gdriveEmail,
+      callback: (resp)=>{
+        if(resp.error || !resp.access_token){
+          // Silent re-auth failed — keep UI connected but token is null
+          // User will get an error when they try to sync, prompting them to reconnect
+          return;
+        }
+        gdriveToken = resp.access_token;
+      }
+    });
+    client.requestAccessToken({prompt:''});
+  } catch(e){
+    // Google Identity Services not loaded yet — will retry on user action
+  }
+}
 
 function gdriveSignIn(){
   const client = google.accounts.oauth2.initTokenClient({
@@ -2292,36 +2327,69 @@ function gdriveSignIn(){
     callback: async (resp) => {
       if(resp.error){ showToast('⚠️ Google sign-in failed'); return; }
       gdriveToken = resp.access_token;
-      // Get user info for display
       try {
         const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers:{Authorization:`Bearer ${gdriveToken}`}
         });
         const u = await r.json();
-        gdriveSetConnected(u.email);
-      } catch { gdriveSetConnected('Connected'); }
+        gdriveEmail = u.email;
+        localStorage.setItem('b2l_gdrive_email', gdriveEmail);
+        gdriveSetConnectedUI(gdriveEmail, true);
+      } catch {
+        gdriveEmail = 'Connected';
+        localStorage.setItem('b2l_gdrive_email', gdriveEmail);
+        gdriveSetConnectedUI(gdriveEmail, true);
+      }
     }
   });
   client.requestAccessToken();
 }
 
-function gdriveSetConnected(email){
+function gdriveSetConnectedUI(email, showToastMsg){
   document.getElementById('gdriveStatus').textContent = email;
   document.getElementById('gdriveStatus').classList.add('connected');
   document.getElementById('gdriveConnectBtn').style.display = 'none';
   document.getElementById('gdriveBody').style.display = 'block';
-  showToast('✓ Google Drive connected');
+  if(showToastMsg) showToast('✓ Google Drive connected');
 }
+
+// Keep old name as alias so existing calls work
+function gdriveSetConnected(email){ gdriveSetConnectedUI(email, true); }
 
 function gdriveSignOut(){
   if(gdriveToken) google.accounts.oauth2.revoke(gdriveToken);
   gdriveToken = null;
+  gdriveEmail = null;
+  localStorage.removeItem('b2l_gdrive_email');
+  localStorage.removeItem('b2l_gdrive_file_id');
   document.getElementById('gdriveStatus').textContent = 'Not connected';
   document.getElementById('gdriveStatus').classList.remove('connected');
   document.getElementById('gdriveConnectBtn').style.display = 'block';
   document.getElementById('gdriveBody').style.display = 'none';
   document.getElementById('gdriveLastSync').textContent = '';
   showToast('Signed out of Google Drive');
+}
+
+async function gdriveEnsureToken(){
+  if(gdriveToken) return true;
+  if(!gdriveEmail){ showToast('Connect Google Drive first'); return false; }
+  // Token expired — get a new one silently
+  return new Promise(resolve=>{
+    try{
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: GDRIVE_CLIENT_ID,
+        scope: GDRIVE_SCOPE,
+        prompt: '',
+        hint: gdriveEmail,
+        callback: (resp)=>{
+          if(resp.error || !resp.access_token){ showToast('⚠️ Reconnect Google Drive'); resolve(false); return; }
+          gdriveToken = resp.access_token;
+          resolve(true);
+        }
+      });
+      client.requestAccessToken({prompt:''});
+    } catch { showToast('⚠️ Reconnect Google Drive'); resolve(false); }
+  });
 }
 
 async function gdriveFindFile(){
@@ -2334,7 +2402,7 @@ async function gdriveFindFile(){
 }
 
 async function gdriveSave(){
-  if(!gdriveToken){ showToast('Connect Google Drive first'); return; }
+  if(!await gdriveEnsureToken()) return;
   showToast('⏳ Saving to Drive…');
   const backup = JSON.stringify({version:1,savedAt:new Date().toISOString(),logs,exercises:EXERCISES,muscleConfig:MUSCLE_CONFIG});
   try {
@@ -2370,7 +2438,7 @@ async function gdriveSave(){
 }
 
 async function gdriveLoad(){
-  if(!gdriveToken){ showToast('Connect Google Drive first'); return; }
+  if(!await gdriveEnsureToken()) return;
   showToast('⏳ Loading from Drive…');
   try {
     const file = await gdriveFindFile();
